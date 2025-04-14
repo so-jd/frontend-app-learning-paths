@@ -1,122 +1,166 @@
-frontend-template-application
-#############################
+frontend-app-learning-paths
+###########################
 
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
+.. |license-badge| image:: https://img.shields.io/github/license/open-craft/frontend-app-learning-paths.svg
+    :target: https://github.com/open-craft/frontend-app-learning-paths/blob/main/LICENSE
+    :alt: License
+
+.. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
+
+.. |ci-badge| image:: https://github.com/open-craft/frontend-app-learning-paths/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/open-craft/frontend-app-learning-paths/actions/workflows/ci.yml
+    :alt: Continuous Integration
+
+.. |codecov-badge| image:: https://codecov.io/github/open-craft/frontend-app-learning-paths/coverage.svg?branch=main
+    :target: https://codecov.io/github/open-craft/frontend-app-learning-paths?branch=main
+    :alt: Codecov
 
 Purpose
-*******
+=======
 
-This repository is a template for Open edX micro-frontend applications. It is
-flagged as a Template Repository, meaning it can be used as a basis for new
-GitHub repositories by clicking the green "Use this template" button above.
-The rest of this document describes how to work with your new micro-frontend
-**after you've created a new repository from the template.**
+The Learning Paths MFE provides a specialized frontend interface for managing and displaying
+learning paths in Open edX. Learning paths are curated sequences of courses that guide learners
+through a structured educational journey toward mastering specific skills or knowledge areas.
+
+This MFE serves as the frontend for the learning-paths-plugin_, which provides the complete backend functionality.
+
+.. _learning-paths-plugin: https://github.com/open-craft/learning-paths-plugin/
 
 Getting Started
-***************
+===============
 
-After copying the template repository, you'll want to do a find-and-replace to
-replace all instances of ``frontend-template-application`` with the name of
-your new repository.  Also edit index.html to replace "Application Template"
-with a friendly name for this application that users will see in their browser
-tab.
+Tutor Setup
+-----------
 
-Prerequisites
-=============
+Follow these steps to set up the Learning Paths MFE with Tutor:
 
-The `devstack`_ is currently recommended as a development environment for your
-new MFE.  If you start it with ``make dev.up.lms`` that should give you
-everything you need as a companion to this frontend.
+#. Navigate to your Tutor plugins directory:
 
-Note that it is also possible to use `Tutor`_ to develop an MFE.  You can refer
-to the `relevant tutor-mfe documentation`_ to get started using it.
+   .. code-block:: bash
 
-.. _Devstack: https://github.com/openedx/devstack
+      cd "$(tutor plugins printroot)"
 
-.. _Tutor: https://github.com/overhangio/tutor
+#. Create a file named ``learning_paths.py`` with the following content:
 
-.. _relevant tutor-mfe documentation: https://github.com/overhangio/tutor-mfe#mfe-development
+   .. code-block:: python
 
-Cloning and Startup
-===================
+      from tutormfe.hooks import MFE_APPS
 
-In the following steps, replace "[PLACEHOLDER]" with the name of the repo you
-created when copying this template above.
+      @MFE_APPS.add()
+      def _add_learning_paths_mfe(mfes):
+          mfes["learning-paths"] = {
+              "repository": "https://github.com/open-craft/frontend-app-learning-paths.git",
+              "port": 2100,
+              "version": "main",  # optional, will default to the Open edX current tag
+          }
+          return mfes
 
-1. Clone your new repo:
+#. Enable the plugin:
 
-  ``git clone https://github.com/openedx/frontend-app-[PLACEHOLDER].git``
+   .. code-block:: bash
 
-2. Use node v18.x.
+      tutor plugins enable learning_paths
 
-   The current version of the micro-frontend build scripts support node 18.
-   Using other major versions of node *may* work, but this is unsupported.  For
-   convenience, this repository includes an .nvmrc file to help in setting the
-   correct node version via `nvm <https://github.com/nvm-sh/nvm>`_.
+#. Build the MFE image:
 
-3. Install npm dependencies:
+   .. code-block:: bash
 
-  ``cd frontend-app-[PLACEHOLDER] && npm install``
+      tutor images build mfe
 
-4. Update the application port to use for local development:
+#. Restart the MFE container to apply changes:
 
-   Default port is 8080. If this does not work for you, update the line
-   `PORT=8080` to your port in all .env.* files
+   .. code-block:: bash
 
-5. Start the dev server:
+      tutor dev stop mfe && tutor dev start -d
 
-  ``npm start``
+#. Access the Learning Paths MFE at: http://apps.local.openedx.io:2100/learning-paths/
 
-The dev server is running at `http://localhost:8080 <http://localhost:8080>`_
-or whatever port you setup.
+Development Setup
+-----------------
 
-Making Your New Project's README File
-=====================================
+After completing the Tutor setup, prepare the repository for local development:
 
-Move ``README-template-frontend-app.rst`` to your project's ``README.rst``
-file. Please fill out all the sections - this helps out all developers
-understand your MFE, how to install it, and how to use it.
+#. Clone this repository:
 
-Developing
-**********
+   .. code-block:: bash
 
-This section concerns development of ``frontend-template-application`` itself,
-not the templated copy.
+      git clone https://github.com/open-craft/frontend-app-learning-paths.git
+      cd frontend-app-learning-paths
 
-It should be noted that one of the goals of this repository is for it to
-function correctly as an MFE (as in ``npm install && npm start``) even if no
-modifications are made.  This ensures that developers get a *practical* working
-example, not just a theoretical one.
+#. Create `.env.private` with the following content:
 
-This also means, of course, that any committed code should be tested and
-subject to both CI and branch protection rules.
+   .. code-block:: bash
 
-Project Structure
-=================
+      LMS_BASE_URL='http://local.openedx.io:8000'
+      LOGIN_URL='http://local.openedx.io:8000/login'
+      LOGOUT_URL='http://local.openedx.io:8000/logout'
+      REFRESH_ACCESS_TOKEN_ENDPOINT='http://local.openedx.io:8000/login_refresh'
+      TERMS_OF_SERVICE_URL='https://www.edx.org/edx-terms-service'
+      PRIVACY_POLICY_URL='http://local.openedx.io:8000/privacy'
 
-The source for this project is organized into nested submodules according to
-the `Feature-based Application Organization ADR`_.
+#. Install dependencies:
 
-.. _Feature-based Application Organization ADR: https://github.com/openedx/frontend-template-application/blob/master/docs/decisions/0002-feature-based-application-organization.rst
+   .. code-block:: bash
 
-Build Process Notes
-===================
+      npm install
 
-**Production Build**
+#. Mount the repository for development:
 
-The production build is created with ``npm run build``.
+   .. code-block:: bash
 
-Internationalization
-====================
+      cd ..
+      tutor mounts add $(pwd)/frontend-app-learning-paths
 
-Please see refer to the `frontend-platform i18n howto`_ for documentation on
-internationalization.
+#. Restart the MFE container (to unbind the port) and start the MFEs:
 
-.. _frontend-platform i18n howto: https://github.com/openedx/frontend-platform/blob/master/docs/how_tos/i18n.rst
+   .. code-block:: bash
+
+      tutor dev stop mfe && tutor dev start -d
+
+#. Make changes to the code and see them reflected in real-time.
+
+Local Development
+-----------------
+
+You can also run this MFE locally without mounting it in Tutor:
+
+#. First, create a Tutor plugin to add CORS configuration:
+
+   .. code-block:: bash
+
+      cd "$(tutor plugins printroot)"
+
+#. Create a file named ``learning_paths.py`` with the following content:
+
+   .. code-block:: python
+
+      from tutor import hooks
+
+      hooks.Filters.ENV_PATCHES.add_item(
+          (
+              "openedx-lms-common-settings",
+              'CORS_ORIGIN_WHITELIST.append("http://apps.local.openedx.io:2100")'
+          )
+      )
+
+#. Enable the plugin:
+
+   .. code-block:: bash
+
+      tutor plugins enable learning_paths
+
+#. Run the MFE locally:
+
+   .. code-block:: bash
+
+      cd frontend-app-learning-paths
+      npm install
+      npm start --local
 
 Getting Help
-************
+============
 
 If you're having trouble, we have discussion forums at
 https://discuss.openedx.org where you can connect with others in the community.
@@ -129,7 +173,7 @@ channel`_.
 For anything non-trivial, the best path is to open an issue in this repository
 with as many details about the issue you are facing as you can provide.
 
-https://github.com/openedx/frontend-template-application/issues
+https://github.com/open-craft/frontend-app-learning-paths/issues
 
 For more information about these options, see the `Getting Help`_ page.
 
@@ -139,7 +183,7 @@ For more information about these options, see the `Getting Help`_ page.
 .. _Getting Help: https://openedx.org/getting-help
 
 License
-*******
+=======
 
 The code in this repository is licensed under the AGPLv3 unless otherwise
 noted.
@@ -147,7 +191,7 @@ noted.
 Please see `LICENSE <LICENSE>`_ for details.
 
 Contributing
-************
+============
 
 Contributions are very welcome.  Please read `How To Contribute`_ for details.
 
@@ -161,36 +205,22 @@ You can start a conversation by creating a new issue on this repo summarizing
 your idea.
 
 The Open edX Code of Conduct
-****************************
+============================
 
 All community members are expected to follow the `Open edX Code of Conduct`_.
 
 .. _Open edX Code of Conduct: https://openedx.org/code-of-conduct/
 
 People
-******
+======
 
 The assigned maintainers for this component and other project details may be
 found in `Backstage`_. Backstage pulls this data from the ``catalog-info.yaml``
 file in this repo.
 
-.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-template-application
+.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-learning-paths
 
 Reporting Security Issues
-*************************
+=========================
 
-Please do not report security issues in public, and email security@openedx.org instead.
-
-.. |license-badge| image:: https://img.shields.io/github/license/openedx/frontend-template-application.svg
-    :target: https://github.com/openedx/frontend-template-application/blob/main/LICENSE
-    :alt: License
-
-.. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
-
-.. |ci-badge| image:: https://github.com/openedx/frontend-template-application/actions/workflows/ci.yml/badge.svg
-    :target: https://github.com/openedx/frontend-template-application/actions/workflows/ci.yml
-    :alt: Continuous Integration
-
-.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-template-application/coverage.svg?branch=main
-    :target: https://codecov.io/github/openedx/frontend-template-application?branch=main
-    :alt: Codecov
+Please do not report security issues in public.  Email security@openedx.org instead.
