@@ -1,199 +1,166 @@
-frontend-app-[PLACEHOLDER]
-##########################
-
-.. note::
-
-  This README is a template.  As a maintainer, please review its contents and
-  update all relevant sections. Instructions to you are marked with
-  "[PLACEHOLDER]" or "[TODO]". Update or remove those sections, and remove this
-  note when you are done.
+frontend-app-learning-paths
+###########################
 
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
-.. |license-badge| image:: https://img.shields.io/github/license/openedx/frontend-app-[PLACEHOLDER].svg
-    :target: https://github.com/openedx/frontend-app-[PLACEHOLDER]/blob/main/LICENSE
+.. |license-badge| image:: https://img.shields.io/github/license/open-craft/frontend-app-learning-paths.svg
+    :target: https://github.com/open-craft/frontend-app-learning-paths/blob/main/LICENSE
     :alt: License
 
 .. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
 
-.. |ci-badge| image:: https://github.com/openedx/frontend-app-[PLACEHOLDER]/actions/workflows/ci.yml/badge.svg
-    :target: https://github.com/openedx/frontend-app-[PLACEHOLDER]/actions/workflows/ci.yml
+.. |ci-badge| image:: https://github.com/open-craft/frontend-app-learning-paths/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/open-craft/frontend-app-learning-paths/actions/workflows/ci.yml
     :alt: Continuous Integration
 
-.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-app-[PLACEHOLDER]/coverage.svg?branch=main
-    :target: https://codecov.io/github/openedx/frontend-app[PLACEHOLDER]?branch=main
+.. |codecov-badge| image:: https://codecov.io/github/open-craft/frontend-app-learning-paths/coverage.svg?branch=main
+    :target: https://codecov.io/github/open-craft/frontend-app-learning-paths?branch=main
     :alt: Codecov
 
 Purpose
 =======
 
-.. note::
+The Learning Paths MFE provides a specialized frontend interface for managing and displaying
+learning paths in Open edX. Learning paths are curated sequences of courses that guide learners
+through a structured educational journey toward mastering specific skills or knowledge areas.
 
-   [TODO]
+This MFE serves as the frontend for the learning-paths-plugin_, which provides the complete backend functionality.
 
-   What is this MFE?  Add a 2-3 sentence description of what it is and what it
-   does.
-
-This is the Awesome MFE.  It was built to provide an unmatched learning
-experience, with improved tools for both randomized goodness and the ability to
-directly reference amaze-blocks in existing courses. This experience is powered
-by the new Fantastico storage engine.
+.. _learning-paths-plugin: https://github.com/open-craft/learning-paths-plugin/
 
 Getting Started
 ===============
 
-Devstack Installation
----------------------
+Tutor Setup
+-----------
 
-.. note::
+Follow these steps to set up the Learning Paths MFE with Tutor:
 
-   [TODO]
+#. Navigate to your Tutor plugins directory:
 
-   Describe in detail how this MFE can be installed and set up for development
-   in a devstack.  Include as many screenshots as you can to make your guide
-   easier to follow!  Use the following steps as an example:
+   .. code-block:: bash
 
-Follow these steps to provision, run, and enable an instance of the
-[PLACEHOLDER] MFE for local development via the `devstack`_.
+      cd "$(tutor plugins printroot)"
 
-.. _devstack: https://github.com/openedx/devstack#getting-started
+#. Create a file named ``learning_paths.py`` with the following content:
 
-#. To start, clone the devstack repository as a child of an arbitrary ``~/workspace/`` directory.
+   .. code-block:: python
 
-   .. code-block::
+      from tutormfe.hooks import MFE_APPS
 
-      mkdir -p ~/workspace/
-      cd ~/workspace/
-      git clone https://github.com/openedx/devstack.git
+      @MFE_APPS.add()
+      def _add_learning_paths_mfe(mfes):
+          mfes["learning-paths"] = {
+              "repository": "https://github.com/open-craft/frontend-app-learning-paths.git",
+              "port": 2100,
+              "version": "main",  # optional, will default to the Open edX current tag
+          }
+          return mfes
 
-#. Configure default services and setup devstack
+#. Enable the plugin:
 
-   Create a ``devstack/options.local.mk`` file with only the services required.
-   Commonly, this will just be the LMS:
+   .. code-block:: bash
 
-   .. code-block::
+      tutor plugins enable learning_paths
 
-      DEFAULT_SERVICES ?= \
-      lms
+#. Build the MFE image:
 
-#. Start the devstack with:
+   .. code-block:: bash
 
-   .. code-block::
+      tutor images build mfe
 
-      cd devstack
-      make dev.pull
-      make dev.provision
-      make dev.up
+#. Restart the MFE container to apply changes:
 
-#. In an LMS shell, enable the ``ENABLE_[PLACEHOLDER]_MICROFRONTEND`` feature flag:
+   .. code-block:: bash
 
-   .. code-block::
+      tutor dev stop mfe && tutor dev start -d
 
-      make lms-shell
-      vim /edx/etc/lms.yml
-      ---
-      FEATURES:
-          ENABLE_[PLACEHOLDER]_MICROFRONTEND: true
+#. Access the Learning Paths MFE at: http://apps.local.openedx.io:2100/learning-paths/
 
-   Exit the shell and restart the LMS so changes take effect:
+Development Setup
+-----------------
 
-   .. code-block::
+After completing the Tutor setup, prepare the repository for local development:
 
-      make lms-restart
+#. Clone this repository:
 
-#. Create and enable the waffle flag required to redirect users to the MFE,
-   enabling it for everyone:
+   .. code-block:: bash
 
-   .. code-block::
+      git clone https://github.com/open-craft/frontend-app-learning-paths.git
+      cd frontend-app-learning-paths
 
-      make lms-shell
-      ./manage.py lms waffle_flag --create --everyone [PLACEHOLDER].redirect_to_microfrontend
+#. Create `.env.private` with the following content:
 
-#. Start this MFE with:
+   .. code-block:: bash
 
-   .. code-block::
+      LMS_BASE_URL='http://local.openedx.io:8000'
+      LOGIN_URL='http://local.openedx.io:8000/login'
+      LOGOUT_URL='http://local.openedx.io:8000/logout'
+      REFRESH_ACCESS_TOKEN_ENDPOINT='http://local.openedx.io:8000/login_refresh'
+      TERMS_OF_SERVICE_URL='https://www.edx.org/edx-terms-service'
+      PRIVACY_POLICY_URL='http://local.openedx.io:8000/privacy'
 
-      cd frontend-app-[PLACEHOLDER]
-      nvm use
-      npm ci
-      npm start
+#. Install dependencies:
 
-#. Finally, open the MFE in a browser
+   .. code-block:: bash
 
-   Navigate to `http://localhost:8080 <http://localhost:8080>`_ to open the
-   MFE.  This is what it should look like if everything worked:
+      npm install
 
-   .. figure:: ./docs/images/template.jpg
+#. Mount the repository for development:
 
-      "Polycon marking template" by mangtronix is licensed under CC BY-SA 2.0.
+   .. code-block:: bash
 
-Configuration
--------------
+      cd ..
+      tutor mounts add $(pwd)/frontend-app-learning-paths
 
-.. note::
+#. Restart the MFE container (to unbind the port) and start the MFEs:
 
-   [TODO]
+   .. code-block:: bash
 
-   Explicitly list anything that this MFE requires to function correctly.  This includes:
+      tutor dev stop mfe && tutor dev start -d
 
-   * A list of both required and optional .env variables, and how they each
-     affect the functioning of the MFE
+#. Make changes to the code and see them reflected in real-time.
 
-   * A list of edx-platform `feature and waffle flags`_ that are either required
-     to enable use of this MFE, or affect the behavior of the MFE in some other
-     way
+Local Development
+-----------------
 
-   * A list of IDAs or other MFEs that this MFE depends on to function correctly
+You can also run this MFE locally without mounting it in Tutor:
 
-.. _feature and waffle flags: https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0017-bp-feature-toggles.html
+#. First, create a Tutor plugin to add CORS configuration:
 
-Plugins
-=======
-This MFE can be customized using `Frontend Plugin Framework <https://github.com/openedx/frontend-plugin-framework>`_.
+   .. code-block:: bash
 
-The parts of this MFE that can be customized in that manner are documented `here </src/plugin-slots>`_.
+      cd "$(tutor plugins printroot)"
 
-[PLACEHOLDER: Other Relevant Sections]
-======================================
+#. Create a file named ``learning_paths.py`` with the following content:
 
-.. note::
+   .. code-block:: python
 
-   [TODO]
+      from tutor import hooks
 
-   This is optional, but you might have additional sections you wish to cover.
-   For instance, architecture documentation, i18n notes, build process, or
-   more.
+      hooks.Filters.ENV_PATCHES.add_item(
+          (
+              "openedx-lms-common-settings",
+              'CORS_ORIGIN_WHITELIST.append("http://apps.local.openedx.io:2100")'
+          )
+      )
 
-Known Issues
-============
+#. Enable the plugin:
 
-.. note::
+   .. code-block:: bash
 
-   [TODO]
+      tutor plugins enable learning_paths
 
-   If there are long-standing known issues, list them here as a bulletted list,
-   linking to the actual issues in the Github repository.
+#. Run the MFE locally:
 
-Development Roadmap
-===================
+   .. code-block:: bash
 
-.. note::
-
-   [TODO]
-
-   Include a list of current development targets, in (rough) descending order
-   of priority.  It can be a simple bulleted list of roadmap items with links
-   to Github issues or wiki pages.
+      cd frontend-app-learning-paths
+      npm install
+      npm start --local
 
 Getting Help
 ============
-
-.. note::
-
-   [TODO]
-
-   Use the following as a template, but feel free to add specific places where
-   this MFE is commonly discussed.
 
 If you're having trouble, we have discussion forums at
 https://discuss.openedx.org where you can connect with others in the community.
@@ -206,7 +173,7 @@ channel`_.
 For anything non-trivial, the best path is to open an issue in this repository
 with as many details about the issue you are facing as you can provide.
 
-https://github.com/openedx/frontend-app-[PLACEHOLDER]/issues
+https://github.com/open-craft/frontend-app-learning-paths/issues
 
 For more information about these options, see the `Getting Help`_ page.
 
@@ -225,12 +192,6 @@ Please see `LICENSE <LICENSE>`_ for details.
 
 Contributing
 ============
-
-.. note::
-
-   [TODO]
-
-   Feel free to add contribution details specific to your repository.
 
 Contributions are very welcome.  Please read `How To Contribute`_ for details.
 
@@ -257,7 +218,7 @@ The assigned maintainers for this component and other project details may be
 found in `Backstage`_. Backstage pulls this data from the ``catalog-info.yaml``
 file in this repo.
 
-.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-[PLACEHOLDER]
+.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-app-learning-paths
 
 Reporting Security Issues
 =========================
