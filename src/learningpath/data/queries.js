@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import * as api from './api';
 import { addCompletionStatus, createCompletionsMap } from './dataUtils';
@@ -284,4 +284,36 @@ export const usePrefetchCourseDetail = (courseId) => {
   }, [courseId, queryClient]);
 
   return prefetchCourse;
+};
+
+export const useEnrollLearningPath = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.enrollInLearningPath,
+    onSuccess: (_, learningPathId) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.LEARNING_PATH_DETAIL(learningPathId),
+        (oldData) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              isEnrolled: true,
+            };
+          }
+          return oldData;
+        },
+      );
+
+      queryClient.setQueryData(
+        QUERY_KEYS.ALL_LEARNING_PATHS,
+        (oldData) => {
+          if (!oldData) { return oldData; }
+          return oldData.map(path => (path.key === learningPathId
+            ? { ...path, isEnrolled: true }
+            : path));
+        },
+      );
+    },
+  });
 };

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   useParams, Link, useLocation, useNavigate,
 } from 'react-router-dom';
@@ -13,7 +13,7 @@ import {
   AccessTimeFilled,
 } from '@openedx/paragon/icons';
 import { buildAssetUrl } from '../util/assetUrl';
-import { useLearningPathDetail, useCoursesByIds } from './data/queries';
+import { useLearningPathDetail, useCoursesByIds, useEnrollLearningPath } from './data/queries';
 import CourseCard from './CourseCard';
 import CourseDetailPage from './CourseDetails';
 import { buildCourseHomeUrl } from './utils';
@@ -23,9 +23,10 @@ const LearningPathDetailPage = () => {
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [enrolling, setEnrolling] = useState(false);
 
-  // Check if we're in the enrolled view mode.
-  const isEnrolledView = useMemo(
+  // Get the requested view mode from URL params.
+  const requestedEnrolledView = useMemo(
     () => new URLSearchParams(location.search).get('view') === 'enrolled',
     [location.search],
   );
@@ -36,6 +37,19 @@ const LearningPathDetailPage = () => {
     error: detailError,
   } = useLearningPathDetail(key);
 
+  // Check if the user can access the enrolled view.
+  const isEnrolledView = useMemo(
+    () => requestedEnrolledView && detail?.isEnrolled === true,
+    [requestedEnrolledView, detail?.isEnrolled],
+  );
+
+  // Redirect unenrolled users trying to access the enrolled view.
+  useEffect(() => {
+    if (!loadingDetail && detail && requestedEnrolledView && !detail.isEnrolled) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [requestedEnrolledView, detail, loadingDetail, navigate, location.pathname]);
+
   const courseIds = useMemo(() => (detail && detail.steps ? detail.steps.map(step => step.courseKey) : []), [detail]);
 
   const {
@@ -43,6 +57,8 @@ const LearningPathDetailPage = () => {
     isLoading: loadingCourses,
     error: coursesError,
   } = useCoursesByIds(courseIds);
+
+  const enrollMutation = useEnrollLearningPath();
 
   const accessUntilDate = useMemo(() => {
     if (!coursesForPath) {
@@ -80,6 +96,24 @@ const LearningPathDetailPage = () => {
     navigate(`${location.pathname}?view=enrolled`);
   };
 
+  const handleEnrollClick = async () => {
+    if (detail && !detail.isEnrolled) {
+      setEnrolling(true);
+      try {
+        await enrollMutation.mutateAsync(key);
+        navigate(`${location.pathname}?view=enrolled`);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Enrollment failed:', error);
+      } finally {
+        setEnrolling(false);
+      }
+    } else {
+      // Already enrolled.
+      navigate(`${location.pathname}?view=enrolled`);
+    }
+  };
+
   let content;
   if (loadingDetail || loadingCourses) {
     content = <Spinner animation="border" variant="primary" />;
@@ -98,6 +132,7 @@ const LearningPathDetailPage = () => {
       durationInDays,
       requiredSkills,
       description,
+      isEnrolled,
     } = detail;
 
     const durationText = durationInDays ? `${durationInDays} days` : null;
@@ -237,9 +272,14 @@ const LearningPathDetailPage = () => {
             <Button
               variant="primary"
               className="ml-auto"
-              onClick={handleViewClick}
+              onClick={isEnrolled ? handleViewClick : handleEnrollClick}
+              disabled={enrolling}
             >
-              View
+              {(() => {
+                if (enrolling) { return 'Enrolling...'; }
+                if (isEnrolled) { return 'View'; }
+                return 'Enroll';
+              })()}
             </Button>
           </div>
           <div className="p-4 lp-info">

@@ -94,3 +94,22 @@ export async function fetchAllCourseCompletions() {
     completion: item.completion,
   })));
 }
+
+export async function enrollInLearningPath(learningPathId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.post(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathId}/enrollments/`,
+    );
+    return {
+      success: true,
+      status: response.status,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status,
+      error,
+    };
+  }
+}
