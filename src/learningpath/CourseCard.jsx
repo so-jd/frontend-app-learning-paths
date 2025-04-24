@@ -49,6 +49,7 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
 
   let statusVariant = 'dark'; // default
   let statusIcon = 'fa-circle'; // default icon
+  let buttonText = 'View';
   switch (status?.toLowerCase()) {
     case 'completed':
       statusVariant = 'success';
@@ -57,10 +58,12 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
     case 'not started':
       statusVariant = 'secondary';
       statusIcon = LmsCompletionSolid;
+      buttonText = 'Start';
       break;
     case 'in progress':
       statusVariant = 'info';
       statusIcon = Timelapse;
+      buttonText = 'Resume';
       break;
     default:
       statusVariant = 'dark';
@@ -75,7 +78,6 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
     })
     : null;
 
-  let buttonText = 'View';
   let buttonVariant = 'outline-primary';
 
   // Update the button based on enrollment status (if available).
@@ -94,7 +96,7 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
   return (
     <Card className="course-card p-3" onMouseEnter={handleMouseEnter}>
       <div className="lp-status-badge">
-        <Badge variant={statusVariant} className="d-flex align-items-center">
+        <Badge variant={statusVariant} className={`d-flex text-uppercase align-items-center status-${statusVariant}`}>
           <Icon src={statusIcon} className="mr-1" />
           {status}
         </Badge>
@@ -105,14 +107,16 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
           <Card.ImageCap
             src={buildAssetUrl(courseImageAssetPath)}
             alt={name}
-            style={{ maxHeight: '150px', objectFit: 'cover' }}
+            style={{ objectFit: 'cover' }}
           />
           )}
         </Col>
         <Col xs={12} md={8}>
-          <div className="course-type-label text-uppercase mb-2">
-            <Icon src={LmsBook} className="mr-1" />
-            <span>Course</span>
+          <div className="course-type-label text-uppercase mb-2 d-flex align-items-center">
+            <span className="course-type-icon d-inline-flex align-items-center justify-content-center mr-1">
+              <Icon src={LmsBook} className="mr-1" />
+            </span>
+            <span style={{ color: '#8C8179' }}>Course</span>
           </div>
           <Card.Header className="p-0 mb-2" title={name} />
           {org && <p className="card-subtitle text-muted mb-2">{org}</p>}
@@ -127,7 +131,7 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
           <Card.Footer className="p-0 d-flex align-items-center">
             <div className="d-flex flex-wrap mr-auto mb-2">
               {endDateFormatted && (
-                <div className="mr-3 d-flex align-items-center">
+                <div className="mr-3 d-flex align-items-center" style={{ fontSize: '0.9rem' }}>
                   <Icon src={AccessTime} className="mr-1" />
                   Access until {endDateFormatted}
                 </div>
@@ -139,7 +143,7 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
               </Button>
             ) : (
               <Link to={linkTo}>
-                <Button variant="outline-primary">View</Button>
+                <Button variant="outline-primary">{buttonText}</Button>
               </Link>
             )}
           </Card.Footer>

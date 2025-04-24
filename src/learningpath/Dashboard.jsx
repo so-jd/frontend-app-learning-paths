@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Spinner, Row, Col, Button,
+  Spinner, Row, Col, Button, Pagination,
 } from '@openedx/paragon';
 import { useLearningPaths, useCourses } from './data/queries';
 import LearningPathCard from './LearningPathCard';
@@ -51,10 +51,20 @@ const Dashboard = () => {
     return typeMatch && statusMatch;
   }), [items, selectedContentType, selectedStatuses]);
 
+  const PAGE_SIZE = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredItems.slice(start, start + PAGE_SIZE);
+  }, [filteredItems, currentPage]);
+
   return (
     <div className="learningpath-list">
       {isLoading ? (
-        <Spinner animation="border" variant="primary" />
+        <div className="d-flex justify-content-center align-items-center vh-100">
+          <Spinner animation="border" variant="primary" />
+        </div>
       ) : (
         <>
           {showFilters && (
@@ -75,8 +85,9 @@ const Dashboard = () => {
                 <i className="fas fa-filter" /> Filter
               </Button>
             )}
+            <hr className="mt-0 mb-4" />
             <Row>
-              {filteredItems.map(item => (item.type === 'course' ? (
+              {paginatedItems.map(item => (item.type === 'course' ? (
                 <Col key={item.id} xs={12} lg={8} className="mb-4 ml-6">
                   <CourseCard course={item} />
                 </Col>
@@ -86,6 +97,13 @@ const Dashboard = () => {
                 </Col>
               )))}
             </Row>
+            <Pagination
+              paginationLabel="learning items navigation"
+              pageCount={totalPages}
+              currentPage={currentPage}
+              onPageSelect={page => setCurrentPage(page)}
+              className="d-flex justify-content-center mt-4"
+            />
           </div>
         </>
       )}

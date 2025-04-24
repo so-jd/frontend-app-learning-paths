@@ -40,6 +40,7 @@ const LearningPathCard = ({ learningPath }) => {
 
   let statusVariant = 'dark';
   let statusIcon = 'fa-circle';
+  let buttonText = 'View';
   switch (status?.toLowerCase()) {
     case 'completed':
       statusVariant = 'success';
@@ -48,10 +49,12 @@ const LearningPathCard = ({ learningPath }) => {
     case 'not started':
       statusVariant = 'secondary';
       statusIcon = LmsCompletionSolid;
+      buttonText = 'Start';
       break;
     case 'in progress':
       statusVariant = 'info';
       statusIcon = Timelapse;
+      buttonText = 'Resume';
       break;
     default:
       statusVariant = 'dark';
@@ -72,7 +75,7 @@ const LearningPathCard = ({ learningPath }) => {
   return (
     <Card className="learning-path-card p-3 position-relative" onMouseEnter={handleMouseEnter}>
       <div className="lp-status-badge">
-        <Badge variant={statusVariant} className="d-flex align-items-center">
+        <Badge variant={statusVariant} className={`d-flex text-uppercase align-items-center status-${statusVariant}`}>
           <Icon src={statusIcon} className="mr-1" />
           {status}
         </Badge>
@@ -88,9 +91,11 @@ const LearningPathCard = ({ learningPath }) => {
           )}
         </Col>
         <Col xs={12} md={8}>
-          <div className="lp-type-label text-uppercase mb-2">
-            <Icon src={FormatListBulleted} className="mr-1" />
-            <span>Learning Path</span>
+          <div className="lp-type-label text-uppercase mb-2 d-flex align-items-center">
+            <span className="lp-type-icon d-inline-flex align-items-center justify-content-center mr-1">
+              <Icon src={FormatListBulleted} className="mr-1" />
+            </span>
+            <span style={{ color: '#821122' }}>Learning Path</span>
           </div>
           <Card.Header className="p-0 mb-2" title={displayName} />
           {subtitleLine && (
@@ -106,7 +111,7 @@ const LearningPathCard = ({ learningPath }) => {
               className="mb-2"
             />
           )}
-          <Card.Footer className="p-3 d-flex align-items-center">
+          <Card.Footer className="d-flex align-items-center">
             <div className="lp-meta d-flex flex-wrap mr-auto mb-2">
               {numCourses && (
                 <div className="mr-3 d-flex align-items-center">
@@ -122,7 +127,7 @@ const LearningPathCard = ({ learningPath }) => {
               )}
             </div>
             <Link to={`/learningpath/${key}`}>
-              <Button variant="outline-primary">View</Button>
+              <Button variant="outline-primary">{buttonText}</Button>
             </Link>
           </Card.Footer>
         </Col>
