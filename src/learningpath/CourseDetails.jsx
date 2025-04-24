@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getConfig } from '@edx/frontend-platform';
 import {
   Spinner,
   Card,
@@ -23,6 +22,7 @@ import {
 } from '@openedx/paragon/icons';
 import { useCourseDetail } from './data/queries';
 import { buildAssetUrl } from '../util/assetUrl';
+import { buildCourseHomeUrl } from './utils';
 
 const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
   const {
@@ -53,14 +53,6 @@ const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
   const handleClose = onClose || (() => navigate(-1));
   const { courseKey: urlCourseKey } = useParams();
   const activeCourseKey = course.id || urlCourseKey;
-  const learningMfeBase = getConfig().LEARNING_BASE_URL;
-  const buildCourseHomeUrl = (key) => {
-    const trimmedBase = learningMfeBase.replace(/\/$/, '');
-    const sanitizedBase = trimmedBase.endsWith('/learning')
-      ? trimmedBase
-      : `${trimmedBase}/learning`;
-    return `${sanitizedBase}/course/${key}/home`;
-  };
   const handleViewClick = () => {
     window.location.href = buildCourseHomeUrl(activeCourseKey);
   };
