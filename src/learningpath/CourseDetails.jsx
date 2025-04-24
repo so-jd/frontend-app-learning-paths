@@ -145,13 +145,15 @@ const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
             <Nav.Link eventKey="about">About</Nav.Link>
           </Nav.Item>
         </Nav>
-        <Button
-          variant="primary"
-          className="ml-auto"
-          onClick={handleViewClick}
-        >
-          View
-        </Button>
+        {!isModalView && (
+          <Button
+            variant="primary"
+            className="ml-auto"
+            onClick={handleViewClick}
+          >
+            View
+          </Button>
+        )}
       </div>
 
       <div className="p-4">
