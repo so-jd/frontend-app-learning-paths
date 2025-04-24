@@ -23,7 +23,8 @@ export async function fetchCourses() {
     const { courseRun, course: courseInfo } = course;
 
     return {
-      courseId: courseRun.courseId.split(':')[1].split('+')[1], // FIXME: We should use `course_id` instead of `number`.
+      id: courseRun.courseId,
+      number: courseRun.courseId.split(':')[1].split('+')[1],
       org: courseRun.courseId.split(':')[1].split('+')[0],
       run: courseRun.courseId.split(':')[1].split('+')[2],
       name: courseInfo.courseName,
@@ -45,7 +46,6 @@ export async function fetchCourseDetails(courseId) {
 
   return camelCaseObject({
     id: data.course_id,
-    courseId: data.number, // FIXME: We should use `course_id` instead of `number`.
     number: data.number,
     org: data.org,
     run: data.id.split(':')[1].split('+')[2],

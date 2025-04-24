@@ -177,14 +177,7 @@ export const useCourses = () => {
       const completionsMap = createCompletionsMap(completions);
 
       const courses = await api.fetchCourses();
-
-      return courses.map(course => {
-        const courseKey = `course-v1:${course.org}+${course.courseId}+${course.run}`;
-        return {
-          ...addCompletionStatus(course, completionsMap, courseKey),
-          type: 'course',
-        };
-      });
+      return courses.map(course => ({ ...addCompletionStatus(course, completionsMap, course.id), type: 'course' }));
     },
   });
 };

@@ -15,7 +15,7 @@ import { buildAssetUrl } from '../util/assetUrl';
 import { usePrefetchCourseDetail } from './data/queries';
 
 const CourseCard = ({ course, parentPath, onClick }) => {
-  const courseKey = `course-v1:${course.org}+${course.courseId}+${course.run}`;
+  const courseKey = course.id;
   const {
     name,
     org,
@@ -129,10 +129,9 @@ const CourseCard = ({ course, parentPath, onClick }) => {
 
 CourseCard.propTypes = {
   course: PropTypes.shape({
+    id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     org: PropTypes.string.isRequired,
-    courseId: PropTypes.string.isRequired,
-    run: PropTypes.string.isRequired,
     courseImageAssetPath: PropTypes.string,
     endDate: PropTypes.string,
     status: PropTypes.string.isRequired,

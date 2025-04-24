@@ -77,7 +77,7 @@ const Dashboard = () => {
             )}
             <Row>
               {filteredItems.map(item => (item.type === 'course' ? (
-                <Col key={`course-v1:${item.org}+${item.courseId}+${item.run}`} xs={12} lg={8} className="mb-4 ml-6">
+                <Col key={item.id} xs={12} lg={8} className="mb-4 ml-6">
                   <CourseCard course={item} />
                 </Col>
               ) : (

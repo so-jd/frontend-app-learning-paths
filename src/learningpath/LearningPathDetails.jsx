@@ -195,11 +195,11 @@ const LearningPathDetailPage = () => {
             )}
             {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
               coursesForPath.map(course => (
-                <div key={course.courseId} className="mb-3">
+                <div key={course.id} className="mb-3">
                   <CourseCard
                     course={course}
                     parentPath=""
-                    onClick={() => handleOpenCourseModal(course.courseId ? `course-v1:${course.org}+${course.courseId}+${course.run}` : null)}
+                    onClick={() => handleOpenCourseModal(course.id)}
                   />
                 </div>
               ))
