@@ -141,9 +141,4 @@ CourseCard.propTypes = {
   onClick: PropTypes.func,
 };
 
-CourseCard.defaultProps = {
-  parentPath: undefined,
-  onClick: undefined,
-};
-
 export default CourseCard;

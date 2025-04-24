@@ -24,7 +24,7 @@ import {
 import { useCourseDetail } from './data/queries';
 import { buildAssetUrl } from '../util/assetUrl';
 
-const CourseDetailContent = ({ course, isModalView, onClose }) => {
+const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
   const {
     name,
     shortDescription,
@@ -187,11 +187,6 @@ CourseDetailContent.propTypes = {
   onClose: PropTypes.func,
 };
 
-CourseDetailContent.defaultProps = {
-  isModalView: false,
-  onClose: undefined,
-};
-
 const CourseDetailPage = ({ isModalView = false, onClose, courseKey: propCourseKey }) => {
   const { courseKey: urlCourseKey } = useParams();
   const courseKey = propCourseKey || urlCourseKey;
@@ -245,12 +240,6 @@ CourseDetailPage.propTypes = {
   isModalView: PropTypes.bool,
   onClose: PropTypes.func,
   courseKey: PropTypes.string,
-};
-
-CourseDetailPage.defaultProps = {
-  isModalView: false,
-  onClose: undefined,
-  courseKey: undefined,
 };
 
 export default CourseDetailPage;
