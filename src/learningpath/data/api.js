@@ -61,15 +61,17 @@ export async function fetchCourseDetails(courseId) {
 }
 
 export async function fetchCourseCompletion(courseId) {
-  const { username } = getAuthenticatedUser();
-  const client = getAuthenticatedHttpClient();
-  const response = await client.get(
-    `${getConfig().LMS_BASE_URL}/completion-aggregator/v1/course/${encodeURIComponent(courseId)}/?username=${username}`,
-  );
-  if (response.data.results && response.data.results.length > 0) {
-    return response.data.results[0].completion.percent;
+  try {
+    const { username } = getAuthenticatedUser();
+    const client = getAuthenticatedHttpClient();
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/completion-aggregator/v1/course/${encodeURIComponent(courseId)}/?username=${username}`,
+    );
+    return response.data.results?.[0]?.completion?.percent ?? 0.0;
+  } catch (error) {
+    // Handle API errors - they indicate the user is not enrolled or did not complete any XBlocks.
+    return 0.0;
   }
-  return 0.0;
 }
 
 export async function fetchAllCourseCompletions() {
