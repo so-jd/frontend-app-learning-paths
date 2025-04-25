@@ -115,3 +115,22 @@ export async function enrollInLearningPath(learningPathId) {
     };
   }
 }
+
+export async function fetchCourseEnrollmentStatus(courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/api/enrollment/v1/enrollment/${courseId}`,
+    );
+    return {
+      isEnrolled: response.data?.is_active === true,
+      data: camelCaseObject(response.data),
+    };
+  } catch (error) {
+    // Handle API errors - they indicate the user is not enrolled.
+    return {
+      isEnrolled: false,
+      error,
+    };
+  }
+}

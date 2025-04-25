@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   COURSE_DETAILS: (courseId) => ['course', courseId],
   COURSE_COMPLETIONS: ['courseCompletions'],
   COURSE_COMPLETION: (courseId) => ['courseCompletion', courseId],
+  COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
 };
 
 // Stale time configurations
@@ -21,6 +22,7 @@ export const STALE_TIMES = {
 
   COURSES: 5 * 60 * 1000, // 5 minutes
   COURSE_DETAIL: 5 * 60 * 1000, // 5 minutes
+  COURSE_ENROLLMENTS: 60 * 1000, // 1 minute
 
   COMPLETIONS: 60 * 1000, // 1 minute
 };
@@ -285,6 +287,14 @@ export const usePrefetchCourseDetail = (courseId) => {
 
   return prefetchCourse;
 };
+
+export const useCourseEnrollmentStatus = (courseId) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId),
+  queryFn: () => api.fetchCourseEnrollmentStatus(courseId),
+  enabled: !!courseId,
+  staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
+  refetchOnWindowFocus: false,
+});
 
 export const useEnrollLearningPath = () => {
   const queryClient = useQueryClient();

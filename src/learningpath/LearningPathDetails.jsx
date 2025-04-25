@@ -14,7 +14,7 @@ import {
 } from '@openedx/paragon/icons';
 import { buildAssetUrl } from '../util/assetUrl';
 import { useLearningPathDetail, useCoursesByIds, useEnrollLearningPath } from './data/queries';
-import CourseCard from './CourseCard';
+import { CourseCard, CourseCardWithEnrollment } from './CourseCard';
 import CourseDetailPage from './CourseDetails';
 import { buildCourseHomeUrl } from './utils';
 
@@ -237,10 +237,9 @@ const LearningPathDetailPage = () => {
             {!loadingCourses && !coursesError && coursesForPath && coursesForPath.length > 0 && (
               coursesForPath.map(course => (
                 <div key={course.id} className="mb-3">
-                  <CourseCard
+                  <CourseCardWithEnrollment
                     course={course}
-                    parentPath=""
-                    onClick={() => handleCourseViewButton(course.id)}
+                    onClick={handleCourseViewButton}
                   />
                 </div>
               ))
@@ -301,7 +300,7 @@ const LearningPathDetailPage = () => {
                     <CourseCard
                       course={course}
                       parentPath=""
-                      onClick={() => handleCourseViewButton(course.id)}
+                      onClick={handleCourseViewButton}
                     />
                   </div>
                 ))

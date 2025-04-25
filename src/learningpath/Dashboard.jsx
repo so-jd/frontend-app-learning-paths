@@ -4,7 +4,7 @@ import {
 } from '@openedx/paragon';
 import { useLearningPaths, useCourses } from './data/queries';
 import LearningPathCard from './LearningPathCard';
-import CourseCard from './CourseCard';
+import { CourseCard } from './CourseCard';
 import FilterPanel from './FilterPanel';
 
 const Dashboard = () => {

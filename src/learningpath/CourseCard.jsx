@@ -12,9 +12,9 @@ import {
   Timelapse,
 } from '@openedx/paragon/icons';
 import { buildAssetUrl } from '../util/assetUrl';
-import { usePrefetchCourseDetail } from './data/queries';
+import { usePrefetchCourseDetail, useCourseEnrollmentStatus } from './data/queries';
 
-const CourseCard = ({ course, parentPath, onClick }) => {
+export const CourseCard = ({ course, parentPath, onClick }) => {
   const courseKey = course.id;
   const {
     name,
@@ -23,6 +23,8 @@ const CourseCard = ({ course, parentPath, onClick }) => {
     endDate,
     status,
     percent,
+    isEnrolledInCourse,
+    checkingEnrollment,
   } = course;
 
   // Prefetch the course detail when the user hovers over the card.
@@ -71,6 +73,23 @@ const CourseCard = ({ course, parentPath, onClick }) => {
       year: 'numeric',
     })
     : null;
+
+  let buttonText = 'View';
+  let buttonVariant = 'outline-primary';
+
+  // Update the button based on enrollment status (if available).
+  if (isEnrolledInCourse === false) {
+    buttonText = 'Start';
+    buttonVariant = 'primary';
+  } else if (isEnrolledInCourse === true) {
+    buttonText = 'Resume';
+    buttonVariant = 'outline-success';
+  }
+
+  if (checkingEnrollment) {
+    buttonText = 'Loading...';
+  }
+
   return (
     <Card className="course-card p-3" onMouseEnter={handleMouseEnter}>
       <div className="lp-status-badge">
@@ -114,7 +133,9 @@ const CourseCard = ({ course, parentPath, onClick }) => {
               )}
             </div>
             {onClick ? (
-              <Button variant="outline-primary" onClick={handleViewClick}>View</Button>
+              <Button variant={buttonVariant} onClick={handleViewClick} disabled={checkingEnrollment}>
+                {buttonText}
+              </Button>
             ) : (
               <Link to={linkTo}>
                 <Button variant="outline-primary">View</Button>
@@ -136,9 +157,33 @@ CourseCard.propTypes = {
     endDate: PropTypes.string,
     status: PropTypes.string.isRequired,
     percent: PropTypes.number.isRequired,
+    isEnrolledInCourse: PropTypes.bool,
+    checkingEnrollment: PropTypes.bool,
   }).isRequired,
   parentPath: PropTypes.string,
   onClick: PropTypes.func,
 };
 
-export default CourseCard;
+export const CourseCardWithEnrollment = ({ course, onClick }) => {
+  const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
+
+  const courseWithEnrollment = {
+    ...course,
+    isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
+    checkingEnrollment,
+  };
+
+  return (
+    <CourseCard
+      course={courseWithEnrollment}
+      onClick={onClick}
+    />
+  );
+};
+
+CourseCardWithEnrollment.propTypes = {
+  course: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+  }).isRequired,
+  onClick: PropTypes.func.isRequired,
+};
