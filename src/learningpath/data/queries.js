@@ -327,3 +327,14 @@ export const useEnrollLearningPath = () => {
     },
   });
 };
+
+export const useEnrollCourse = (learningPathId) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId) => api.enrollInCourse(learningPathId, courseId),
+    onSuccess: (_, courseId) => {
+      queryClient.invalidateQueries(QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId));
+    },
+  });
+};

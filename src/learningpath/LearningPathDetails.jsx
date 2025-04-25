@@ -16,7 +16,6 @@ import { buildAssetUrl } from '../util/assetUrl';
 import { useLearningPathDetail, useCoursesByIds, useEnrollLearningPath } from './data/queries';
 import { CourseCard, CourseCardWithEnrollment } from './CourseCard';
 import CourseDetailPage from './CourseDetails';
-import { buildCourseHomeUrl } from './utils';
 
 const LearningPathDetailPage = () => {
   const { key } = useParams();
@@ -77,14 +76,9 @@ const LearningPathDetailPage = () => {
     return maxDate;
   }, [coursesForPath]);
 
+  // In the details view, open the course details modal.
   const handleCourseViewButton = (courseId) => {
-    // In the enrolled view, navigate directly to the course.
-    if (isEnrolledView) {
-      window.location.href = buildCourseHomeUrl(courseId);
-    } else {
-      // In the details view, open the course details modal.
-      setSelectedCourseKey(courseId);
-    }
+    setSelectedCourseKey(courseId);
   };
 
   const handleCloseCourseModal = () => {
@@ -239,7 +233,7 @@ const LearningPathDetailPage = () => {
                 <div key={course.id} className="mb-3">
                   <CourseCardWithEnrollment
                     course={course}
-                    onClick={handleCourseViewButton}
+                    learningPathId={key}
                   />
                 </div>
               ))

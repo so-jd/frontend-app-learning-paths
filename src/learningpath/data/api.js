@@ -116,6 +116,25 @@ export async function enrollInLearningPath(learningPathId) {
   }
 }
 
+export async function enrollInCourse(learningPathId, courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.post(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathId}/enrollments/${courseId}/`,
+    );
+    return {
+      success: true,
+      status: response.status,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status,
+      error,
+    };
+  }
+}
+
 export async function fetchCourseEnrollmentStatus(courseId) {
   const client = getAuthenticatedHttpClient();
   try {

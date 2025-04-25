@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import {
@@ -12,7 +12,8 @@ import {
   Timelapse,
 } from '@openedx/paragon/icons';
 import { buildAssetUrl } from '../util/assetUrl';
-import { usePrefetchCourseDetail, useCourseEnrollmentStatus } from './data/queries';
+import { usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse } from './data/queries';
+import { buildCourseHomeUrl } from './utils';
 
 export const CourseCard = ({ course, parentPath, onClick }) => {
   const courseKey = course.id;
@@ -164,19 +165,47 @@ CourseCard.propTypes = {
   onClick: PropTypes.func,
 };
 
-export const CourseCardWithEnrollment = ({ course, onClick }) => {
+export const CourseCardWithEnrollment = ({ course, learningPathId }) => {
   const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
+  const [enrolling, setEnrolling] = useState(false);
+  const enrollCourseMutation = useEnrollCourse(learningPathId);
 
   const courseWithEnrollment = {
     ...course,
     isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
-    checkingEnrollment,
+    checkingEnrollment: checkingEnrollment || enrolling,
+  };
+
+  // Defined here because calling the MFE config API from an async function can randomly fail.
+  const courseHomeUrl = buildCourseHomeUrl(course.id);
+
+  const handleCourseAction = async () => {
+    if (courseWithEnrollment.isEnrolledInCourse) {
+      window.location.href = courseHomeUrl;
+      return;
+    }
+
+    setEnrolling(true);
+    try {
+      const result = await enrollCourseMutation.mutateAsync(course.id);
+      if (result.success) {
+        window.location.href = courseHomeUrl;
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Failed to enroll in the course:', result.data?.error || 'Unknown error');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to enroll in the course:', error);
+    } finally {
+      setEnrolling(false);
+    }
   };
 
   return (
     <CourseCard
       course={courseWithEnrollment}
-      onClick={onClick}
+      onClick={handleCourseAction}
     />
   );
 };
@@ -185,5 +214,5 @@ CourseCardWithEnrollment.propTypes = {
   course: PropTypes.shape({
     id: PropTypes.string.isRequired,
   }).isRequired,
-  onClick: PropTypes.func.isRequired,
+  learningPathId: PropTypes.string.isRequired,
 };
