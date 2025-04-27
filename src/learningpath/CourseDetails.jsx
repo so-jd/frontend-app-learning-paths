@@ -125,17 +125,17 @@ const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
               </div>
             </Col>
           )}
-          {selfPaced === true && (
-            <Col xs={6} md={3} className="mb-3">
-              <div className="d-flex align-items-center">
-                <Icon src={Person} className="mr-4 mb-4" />
-                <div>
-                  <p className="mb-1 font-weight-bold">Self-paced</p>
-                  <p className="text-muted">Learn at your own speed</p>
-                </div>
+          <Col xs={6} md={3} className="mb-3">
+            <div className="d-flex align-items-center">
+              <Icon src={Person} className="mr-4 mb-4" />
+              <div>
+                <p className="mb-1 font-weight-bold">{selfPaced ? 'Self-paced' : 'Instructor-paced'}</p>
+                <p className="text-muted">
+                  {selfPaced ? 'Learn at your own speed' : 'Follow the course schedule'}
+                </p>
               </div>
-            </Col>
-          )}
+            </div>
+          </Col>
         </Row>
       </div>
 
@@ -220,7 +220,6 @@ const CourseDetailPage = ({ isModalView = false, onClose, courseKey: propCourseK
     shortDescription: course.shortDescription || '',
     description: course.description || course.shortDescription || '',
     duration: course.duration || '',
-    selfPaced: course.selfPaced !== undefined ? course.selfPaced : true,
   };
 
   return (

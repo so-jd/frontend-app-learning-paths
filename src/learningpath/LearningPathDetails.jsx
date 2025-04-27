@@ -187,8 +187,8 @@ const LearningPathDetailPage = () => {
             <div className="d-flex align-items-center">
               <Icon src={Award} className="mr-4 mb-4" />
               <div>
-                <p className="mb-1 font-weight-bold">Earn a certificate</p>
-                <p className="text-muted">Some subtext</p>
+                <p className="mb-1 font-weight-bold">Certificate</p>
+                <p className="text-muted">Earn a certificate</p>
               </div>
             </div>
           </Col>
@@ -197,7 +197,7 @@ const LearningPathDetailPage = () => {
               <Icon src={Calendar} className="mr-4 mb-4" />
               <div>
                 <p className="mb-1 font-weight-bold">
-                  {durationText || '6 months'}
+                  {durationText || 'Duration not available'}
                 </p>
                 <p className="text-muted">Duration</p>
               </div>
@@ -208,7 +208,7 @@ const LearningPathDetailPage = () => {
               <Icon src={Person} className="mr-4 mb-4" />
               <div>
                 <p className="mb-1 font-weight-bold">Self-paced</p>
-                <p className="text-muted">Some subtext</p>
+                <p className="text-muted">Progress at your own speed</p>
               </div>
             </div>
           </Col>
