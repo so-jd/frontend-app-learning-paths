@@ -278,7 +278,8 @@ const LearningPathDetailPage = () => {
             <section id="about" className="mb-6">
               <h2>About</h2>
               <p>
-                {description || ''}
+                {/* eslint-disable-next-line react/no-danger */}
+                <div dangerouslySetInnerHTML={{ __html: description || 'No description available.' }} />
               </p>
             </section>
             <section id="courses" className="mb-6">
