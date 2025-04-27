@@ -11,6 +11,7 @@ import {
   Calendar,
   FormatListBulleted,
   AccessTimeFilled,
+  ChevronLeft,
 } from '@openedx/paragon/icons';
 import { useLearningPathDetail, useCoursesByIds, useEnrollLearningPath } from './data/queries';
 import { CourseCard, CourseCardWithEnrollment } from './CourseCard';
@@ -114,7 +115,10 @@ const LearningPathDetailPage = () => {
     content = (
       <div className="p-4">
         <p>Failed to load detail</p>
-        <Link to="/">Explore</Link>
+        <Link to="/">
+          <Icon src={ChevronLeft} />
+          <span>Go Back</span>
+        </Link>
       </div>
     );
   } else {
@@ -140,13 +144,14 @@ const LearningPathDetailPage = () => {
     const heroSection = (
       <div className="hero-section p-4">
         <div className="mb-3">
-          <Link to="/" style={{ fontWeight: 600 }}>
-            Explore
+          <Link to="/" style={{ fontWeight: 600 }} className="d-flex">
+            <Icon src={ChevronLeft} />
+            <span>Go Back</span>
           </Link>
         </div>
-        <Row>
+        <Row className="border-bottom border-light">
           <Col xs={12} md={8}>
-            <div className="lp-type-label text-uppercase mb-2">
+            <div className="lp-detail-type-label d-flex text-uppercase mb-2">
               <Icon src={FormatListBulleted} className="mr-1" />
               <span>Learning Path</span>
             </div>
@@ -163,7 +168,7 @@ const LearningPathDetailPage = () => {
               src={image}
               alt={displayName}
               style={{
-                width: '100%', borderRadius: '4px', maxHeight: '250px', objectFit: 'cover',
+                width: '650px', borderRadius: '4px', maxHeight: '500px', objectFit: 'cover',
               }}
             />
             )}
@@ -173,7 +178,7 @@ const LearningPathDetailPage = () => {
           {accessUntilDate && (
             <Col xs={6} md={3} className="mb-3">
               <div className="d-flex align-items-center">
-                <Icon src={AccessTimeFilled} className="mr-4 mb-3" />
+                <Icon src={AccessTimeFilled} className="mr-4 mb-3" style={{ color: '#821122' }} />
                 <div>
                   <p className="mb-0 font-weight-bold">
                     {accessUntilDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -185,7 +190,7 @@ const LearningPathDetailPage = () => {
           )}
           <Col xs={6} md={3} className="mb-3">
             <div className="d-flex align-items-center">
-              <Icon src={Award} className="mr-4 mb-4" />
+              <Icon src={Award} className="mr-4 mb-4" style={{ color: '#821122' }} />
               <div>
                 <p className="mb-1 font-weight-bold">Certificate</p>
                 <p className="text-muted">Earn a certificate</p>
@@ -194,7 +199,7 @@ const LearningPathDetailPage = () => {
           </Col>
           <Col xs={6} md={3} className="mb-3">
             <div className="d-flex align-items-center">
-              <Icon src={Calendar} className="mr-4 mb-4" />
+              <Icon src={Calendar} className="mr-4 mb-4" style={{ color: '#821122' }} />
               <div>
                 <p className="mb-1 font-weight-bold">
                   {durationText || 'Duration not available'}
@@ -205,7 +210,7 @@ const LearningPathDetailPage = () => {
           </Col>
           <Col xs={6} md={3} className="mb-3">
             <div className="d-flex align-items-center">
-              <Icon src={Person} className="mr-4 mb-4" />
+              <Icon src={Person} className="mr-4 mb-4" style={{ color: '#821122' }} />
               <div>
                 <p className="mb-1 font-weight-bold">Self-paced</p>
                 <p className="text-muted">Progress at your own speed</p>
@@ -282,7 +287,7 @@ const LearningPathDetailPage = () => {
                 <div dangerouslySetInnerHTML={{ __html: description || 'No description available.' }} />
               </p>
             </section>
-            <section id="courses" className="mb-6">
+            <section id="courses" className="mb-6 courses-section">
               <h2>Courses</h2>
               {loadingCourses && <Spinner animation="border" variant="primary" />}
               {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
