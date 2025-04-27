@@ -19,12 +19,18 @@ import {
   Calendar,
   Person,
   Close,
+  ChevronLeft,
 } from '@openedx/paragon/icons';
 import { useCourseDetail } from './data/queries';
 import { buildAssetUrl, replaceStaticAssetReferences } from '../util/assetUrl';
 import { buildCourseHomeUrl } from './utils';
 
-const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
+const CourseDetailContent = ({
+  course,
+  isModalView = false,
+  onClose,
+  learningPathTitle,
+}) => {
   const {
     name,
     shortDescription,
@@ -62,19 +68,29 @@ const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
       <div className="hero-section p-4">
         {!isModalView && (
           <div className="mb-3">
-            <Link to="/" style={{ fontWeight: 600 }}>Explore</Link>
+            <Link to="/" style={{ fontWeight: 600 }} className="d-flex">
+              <Icon src={ChevronLeft} />
+              <span>Go Back</span>
+            </Link>
           </div>
         )}
         {isModalView && (
-          <div className="pgn__modal-close-container">
-            <ModalCloseButton variant="tertiary" onClick={handleClose}>
-              <Icon src={Close} />
-            </ModalCloseButton>
+          <div className="lp-course-modal-header d-flex align-items-center justify-content-between py-2">
+            {learningPathTitle && (
+              <h5 className="mb-0">
+                Learning Path: {learningPathTitle}
+              </h5>
+            )}
+            <div className="pgn__modal-close-container">
+              <ModalCloseButton variant="tertiary" onClick={handleClose}>
+                <Icon src={Close} />
+              </ModalCloseButton>
+            </div>
           </div>
         )}
-        <Row>
+        <Row className="border-bottom border-light">
           <Col xs={12} md={8}>
-            <div className="course-type-label text-uppercase mb-2">
+            <div className="course-detail-type-label d-flex text-uppercase mb-2">
               <Icon src={LmsBook} className="mr-1" />
               <span>Course</span>
             </div>
@@ -182,9 +198,15 @@ CourseDetailContent.propTypes = {
   }).isRequired,
   isModalView: PropTypes.bool,
   onClose: PropTypes.func,
+  learningPathTitle: PropTypes.string,
 };
 
-const CourseDetailPage = ({ isModalView = false, onClose, courseKey: propCourseKey }) => {
+const CourseDetailPage = ({
+  isModalView = false,
+  onClose,
+  courseKey: propCourseKey,
+  learningPathTitle,
+}) => {
   const { courseKey: urlCourseKey } = useParams();
   const courseKey = propCourseKey || urlCourseKey;
 
@@ -227,7 +249,12 @@ const CourseDetailPage = ({ isModalView = false, onClose, courseKey: propCourseK
 
   return (
     <div className="course-detail-page">
-      <CourseDetailContent course={courseWithFallbacks} isModalView={isModalView} onClose={onClose} />
+      <CourseDetailContent
+        course={courseWithFallbacks}
+        isModalView={isModalView}
+        onClose={onClose}
+        learningPathTitle={learningPathTitle}
+      />
     </div>
   );
 };
@@ -236,6 +263,7 @@ CourseDetailPage.propTypes = {
   isModalView: PropTypes.bool,
   onClose: PropTypes.func,
   courseKey: PropTypes.string,
+  learningPathTitle: PropTypes.string,
 };
 
 export default CourseDetailPage;

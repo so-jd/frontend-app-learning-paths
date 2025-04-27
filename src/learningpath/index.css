@@ -427,3 +427,25 @@
   font-weight: 600;
   margin-bottom: 1.5rem !important;
 }
+
+.course-detail-type-label {
+  color: white;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: #8C8179;
+  border-radius: 5px;
+  padding: 2px 2px;
+  max-width: 6rem;
+}
+
+.lp-course-modal-header {
+  position: absolute;
+  top: 0 !important;
+
+  .pgn__modal-close-container {
+    position: relative !important;
+    top: 0 !important;
+    margin-left: 66vw;
+  }
+}

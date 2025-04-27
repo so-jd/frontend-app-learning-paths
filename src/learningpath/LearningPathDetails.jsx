@@ -20,6 +20,7 @@ import CourseDetailPage from './CourseDetails';
 const LearningPathDetailPage = () => {
   const { key } = useParams();
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
+  const [selectedPathTitle, setSelectedPathTitle] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   const [enrolling, setEnrolling] = useState(false);
@@ -77,12 +78,14 @@ const LearningPathDetailPage = () => {
   }, [coursesForPath]);
 
   // In the details view, open the course details modal.
-  const handleCourseViewButton = (courseId) => {
+  const handleCourseViewButton = (courseId, pathTitle) => {
     setSelectedCourseKey(courseId);
+    setSelectedPathTitle(pathTitle);
   };
 
   const handleCloseCourseModal = () => {
     setSelectedCourseKey(null);
+    setSelectedPathTitle('');
   };
 
   const handleViewClick = () => {
@@ -143,7 +146,7 @@ const LearningPathDetailPage = () => {
     // Hero section - same for both full view and enrolled view.
     const heroSection = (
       <div className="hero-section p-4">
-        <div className="mb-3">
+        <div className="mb-5">
           <Link to="/" style={{ fontWeight: 600 }} className="d-flex">
             <Icon src={ChevronLeft} />
             <span>Go Back</span>
@@ -333,6 +336,7 @@ const LearningPathDetailPage = () => {
             isModalView
             courseKey={selectedCourseKey}
             onClose={handleCloseCourseModal}
+            learningPathTitle={selectedPathTitle}
           />
         </ModalLayer>
       )}
