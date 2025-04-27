@@ -12,7 +12,6 @@ import {
   FormatListBulleted,
   AccessTimeFilled,
 } from '@openedx/paragon/icons';
-import { buildAssetUrl } from '../util/assetUrl';
 import { useLearningPathDetail, useCoursesByIds, useEnrollLearningPath } from './data/queries';
 import { CourseCard, CourseCardWithEnrollment } from './CourseCard';
 import CourseDetailPage from './CourseDetails';
@@ -121,7 +120,7 @@ const LearningPathDetailPage = () => {
   } else {
     const {
       displayName,
-      imageUrl,
+      image,
       subtitle,
       durationInDays,
       requiredSkills,
@@ -159,9 +158,9 @@ const LearningPathDetailPage = () => {
             )}
           </Col>
           <Col xs={12} md={4} className="d-flex align-items-center justify-content-center">
-            {imageUrl && (
+            {image && (
             <img
-              src={buildAssetUrl(imageUrl)}
+              src={image}
               alt={displayName}
               style={{
                 width: '100%', borderRadius: '4px', maxHeight: '250px', objectFit: 'cover',
