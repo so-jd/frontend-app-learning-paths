@@ -21,7 +21,7 @@ import {
   Close,
 } from '@openedx/paragon/icons';
 import { useCourseDetail } from './data/queries';
-import { buildAssetUrl } from '../util/assetUrl';
+import { buildAssetUrl, replaceStaticAssetReferences } from '../util/assetUrl';
 import { buildCourseHomeUrl } from './utils';
 
 const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
@@ -159,7 +159,10 @@ const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
       <div className="p-4">
         <section id="about" className="mb-6">
           {/* eslint-disable-next-line react/no-danger */}
-          <div dangerouslySetInnerHTML={{ __html: description || shortDescription || 'No description available.' }} />
+          <div dangerouslySetInnerHTML={{
+            __html: replaceStaticAssetReferences(description || shortDescription || 'No description available.', course.id),
+          }}
+          />
         </section>
       </div>
     </>
