@@ -37,8 +37,8 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
   const progressBarPercent = useMemo(() => Math.round(percent * 100), [percent]);
 
   const linkTo = parentPath
-    ? `${parentPath}/course/${encodeURIComponent(courseKey)}`
-    : `/course/${encodeURIComponent(courseKey)}`;
+    ? `${parentPath}/course/${courseKey}`
+    : `/course/${courseKey}`;
 
   const handleViewClick = (e) => {
     if (onClick) {
