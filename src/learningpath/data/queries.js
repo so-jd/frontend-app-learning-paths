@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import * as api from './api';
 import { addCompletionStatus, createCompletionsMap } from './dataUtils';
@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   COURSE_DETAILS: (courseId) => ['course', courseId],
   COURSE_COMPLETIONS: ['courseCompletions'],
   COURSE_COMPLETION: (courseId) => ['courseCompletion', courseId],
+  COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
 };
 
 // Stale time configurations
@@ -21,6 +22,7 @@ export const STALE_TIMES = {
 
   COURSES: 5 * 60 * 1000, // 5 minutes
   COURSE_DETAIL: 5 * 60 * 1000, // 5 minutes
+  COURSE_ENROLLMENTS: 60 * 1000, // 1 minute
 
   COMPLETIONS: 60 * 1000, // 1 minute
 };
@@ -177,14 +179,7 @@ export const useCourses = () => {
       const completionsMap = createCompletionsMap(completions);
 
       const courses = await api.fetchCourses();
-
-      return courses.map(course => {
-        const courseKey = `course-v1:${course.org}+${course.courseId}+${course.run}`;
-        return {
-          ...addCompletionStatus(course, completionsMap, courseKey),
-          type: 'course',
-        };
-      });
+      return courses.map(course => ({ ...addCompletionStatus(course, completionsMap, course.id), type: 'course' }));
     },
   });
 };
@@ -291,4 +286,55 @@ export const usePrefetchCourseDetail = (courseId) => {
   }, [courseId, queryClient]);
 
   return prefetchCourse;
+};
+
+export const useCourseEnrollmentStatus = (courseId) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId),
+  queryFn: () => api.fetchCourseEnrollmentStatus(courseId),
+  enabled: !!courseId,
+  staleTime: STALE_TIMES.COURSE_ENROLLMENTS,
+  refetchOnWindowFocus: false,
+});
+
+export const useEnrollLearningPath = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.enrollInLearningPath,
+    onSuccess: (_, learningPathId) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.LEARNING_PATH_DETAIL(learningPathId),
+        (oldData) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              isEnrolled: true,
+            };
+          }
+          return oldData;
+        },
+      );
+
+      queryClient.setQueryData(
+        QUERY_KEYS.ALL_LEARNING_PATHS,
+        (oldData) => {
+          if (!oldData) { return oldData; }
+          return oldData.map(path => (path.key === learningPathId
+            ? { ...path, isEnrolled: true }
+            : path));
+        },
+      );
+    },
+  });
+};
+
+export const useEnrollCourse = (learningPathId) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId) => api.enrollInCourse(learningPathId, courseId),
+    onSuccess: (_, courseId) => {
+      queryClient.invalidateQueries(QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId));
+    },
+  });
 };

@@ -17,13 +17,12 @@ import {
   FormatListBulleted,
   AccessTime,
 } from '@openedx/paragon/icons';
-import { buildAssetUrl } from '../util/assetUrl';
 import { usePrefetchLearningPathDetail } from './data/queries';
 
 const LearningPathCard = ({ learningPath }) => {
   const {
     key,
-    imageUrl,
+    image,
     displayName,
     subtitle,
     duration,
@@ -80,9 +79,9 @@ const LearningPathCard = ({ learningPath }) => {
       </div>
       <Row>
         <Col xs={12} md={4} className="lp-card-image-col">
-          {imageUrl && (
+          {image && (
             <Card.ImageCap
-              src={buildAssetUrl(imageUrl)}
+              src={image}
               alt={displayName}
               className="lp-card-image"
             />
@@ -135,7 +134,7 @@ const LearningPathCard = ({ learningPath }) => {
 LearningPathCard.propTypes = {
   learningPath: PropTypes.shape({
     key: PropTypes.string.isRequired,
-    imageUrl: PropTypes.string,
+    image: PropTypes.string,
     displayName: PropTypes.string.isRequired,
     subtitle: PropTypes.string,
     duration: PropTypes.string,

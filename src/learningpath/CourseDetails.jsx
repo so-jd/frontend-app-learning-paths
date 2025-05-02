@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getConfig } from '@edx/frontend-platform';
 import {
   Spinner,
   Card,
@@ -22,9 +21,10 @@ import {
   Close,
 } from '@openedx/paragon/icons';
 import { useCourseDetail } from './data/queries';
-import { buildAssetUrl } from '../util/assetUrl';
+import { buildAssetUrl, replaceStaticAssetReferences } from '../util/assetUrl';
+import { buildCourseHomeUrl } from './utils';
 
-const CourseDetailContent = ({ course, isModalView, onClose }) => {
+const CourseDetailContent = ({ course, isModalView = false, onClose }) => {
   const {
     name,
     shortDescription,
@@ -53,14 +53,6 @@ const CourseDetailContent = ({ course, isModalView, onClose }) => {
   const handleClose = onClose || (() => navigate(-1));
   const { courseKey: urlCourseKey } = useParams();
   const activeCourseKey = course.id || urlCourseKey;
-  const learningMfeBase = getConfig().LEARNING_BASE_URL;
-  const buildCourseHomeUrl = (key) => {
-    const trimmedBase = learningMfeBase.replace(/\/$/, '');
-    const sanitizedBase = trimmedBase.endsWith('/learning')
-      ? trimmedBase
-      : `${trimmedBase}/learning`;
-    return `${sanitizedBase}/course/${key}/home`;
-  };
   const handleViewClick = () => {
     window.location.href = buildCourseHomeUrl(activeCourseKey);
   };
@@ -133,17 +125,17 @@ const CourseDetailContent = ({ course, isModalView, onClose }) => {
               </div>
             </Col>
           )}
-          {selfPaced === true && (
-            <Col xs={6} md={3} className="mb-3">
-              <div className="d-flex align-items-center">
-                <Icon src={Person} className="mr-4 mb-4" />
-                <div>
-                  <p className="mb-1 font-weight-bold">Self-paced</p>
-                  <p className="text-muted">Learn at your own speed</p>
-                </div>
+          <Col xs={6} md={3} className="mb-3">
+            <div className="d-flex align-items-center">
+              <Icon src={Person} className="mr-4 mb-4" />
+              <div>
+                <p className="mb-1 font-weight-bold">{selfPaced ? 'Self-paced' : 'Instructor-paced'}</p>
+                <p className="text-muted">
+                  {selfPaced ? 'Learn at your own speed' : 'Follow the course schedule'}
+                </p>
               </div>
-            </Col>
-          )}
+            </div>
+          </Col>
         </Row>
       </div>
 
@@ -153,19 +145,24 @@ const CourseDetailContent = ({ course, isModalView, onClose }) => {
             <Nav.Link eventKey="about">About</Nav.Link>
           </Nav.Item>
         </Nav>
-        <Button
-          variant="primary"
-          className="ml-auto"
-          onClick={handleViewClick}
-        >
-          View
-        </Button>
+        {!isModalView && (
+          <Button
+            variant="primary"
+            className="ml-auto"
+            onClick={handleViewClick}
+          >
+            View
+          </Button>
+        )}
       </div>
 
       <div className="p-4">
         <section id="about" className="mb-6">
           {/* eslint-disable-next-line react/no-danger */}
-          <div dangerouslySetInnerHTML={{ __html: description || shortDescription || 'No description available.' }} />
+          <div dangerouslySetInnerHTML={{
+            __html: replaceStaticAssetReferences(description || shortDescription || 'No description available.', course.id),
+          }}
+          />
         </section>
       </div>
     </>
@@ -185,11 +182,6 @@ CourseDetailContent.propTypes = {
   }).isRequired,
   isModalView: PropTypes.bool,
   onClose: PropTypes.func,
-};
-
-CourseDetailContent.defaultProps = {
-  isModalView: false,
-  onClose: undefined,
 };
 
 const CourseDetailPage = ({ isModalView = false, onClose, courseKey: propCourseKey }) => {
@@ -231,7 +223,6 @@ const CourseDetailPage = ({ isModalView = false, onClose, courseKey: propCourseK
     shortDescription: course.shortDescription || '',
     description: course.description || course.shortDescription || '',
     duration: course.duration || '',
-    selfPaced: course.selfPaced !== undefined ? course.selfPaced : true,
   };
 
   return (
@@ -245,12 +236,6 @@ CourseDetailPage.propTypes = {
   isModalView: PropTypes.bool,
   onClose: PropTypes.func,
   courseKey: PropTypes.string,
-};
-
-CourseDetailPage.defaultProps = {
-  isModalView: false,
-  onClose: undefined,
-  courseKey: undefined,
 };
 
 export default CourseDetailPage;

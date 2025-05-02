@@ -23,7 +23,8 @@ export async function fetchCourses() {
     const { courseRun, course: courseInfo } = course;
 
     return {
-      courseId: courseRun.courseId.split(':')[1].split('+')[1], // FIXME: We should use `course_id` instead of `number`.
+      id: courseRun.courseId,
+      number: courseRun.courseId.split(':')[1].split('+')[1],
       org: courseRun.courseId.split(':')[1].split('+')[0],
       run: courseRun.courseId.split(':')[1].split('+')[2],
       name: courseInfo.courseName,
@@ -45,7 +46,6 @@ export async function fetchCourseDetails(courseId) {
 
   return camelCaseObject({
     id: data.course_id,
-    courseId: data.number, // FIXME: We should use `course_id` instead of `number`.
     number: data.number,
     org: data.org,
     run: data.id.split(':')[1].split('+')[2],
@@ -61,15 +61,17 @@ export async function fetchCourseDetails(courseId) {
 }
 
 export async function fetchCourseCompletion(courseId) {
-  const { username } = getAuthenticatedUser();
-  const client = getAuthenticatedHttpClient();
-  const response = await client.get(
-    `${getConfig().LMS_BASE_URL}/completion-aggregator/v1/course/${encodeURIComponent(courseId)}/?username=${username}`,
-  );
-  if (response.data.results && response.data.results.length > 0) {
-    return response.data.results[0].completion.percent;
+  try {
+    const { username } = getAuthenticatedUser();
+    const client = getAuthenticatedHttpClient();
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/completion-aggregator/v1/course/${encodeURIComponent(courseId)}/?username=${username}`,
+    );
+    return response.data.results?.[0]?.completion?.percent ?? 0.0;
+  } catch (error) {
+    // Handle API errors - they indicate the user is not enrolled or did not complete any XBlocks.
+    return 0.0;
   }
-  return 0.0;
 }
 
 export async function fetchAllCourseCompletions() {
@@ -93,4 +95,61 @@ export async function fetchAllCourseCompletions() {
     course_key: item.course_key,
     completion: item.completion,
   })));
+}
+
+export async function enrollInLearningPath(learningPathId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.post(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathId}/enrollments/`,
+    );
+    return {
+      success: true,
+      status: response.status,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status,
+      error,
+    };
+  }
+}
+
+export async function enrollInCourse(learningPathId, courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.post(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathId}/enrollments/${courseId}/`,
+    );
+    return {
+      success: true,
+      status: response.status,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      status: error.response?.status,
+      error,
+    };
+  }
+}
+
+export async function fetchCourseEnrollmentStatus(courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/api/enrollment/v1/enrollment/${courseId}`,
+    );
+    return {
+      isEnrolled: response.data?.is_active === true,
+      data: camelCaseObject(response.data),
+    };
+  } catch (error) {
+    // Handle API errors - they indicate the user is not enrolled.
+    return {
+      isEnrolled: false,
+      error,
+    };
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import {
@@ -12,10 +12,11 @@ import {
   Timelapse,
 } from '@openedx/paragon/icons';
 import { buildAssetUrl } from '../util/assetUrl';
-import { usePrefetchCourseDetail } from './data/queries';
+import { usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse } from './data/queries';
+import { buildCourseHomeUrl } from './utils';
 
-const CourseCard = ({ course, parentPath, onClick }) => {
-  const courseKey = `course-v1:${course.org}+${course.courseId}+${course.run}`;
+export const CourseCard = ({ course, parentPath, onClick }) => {
+  const courseKey = course.id;
   const {
     name,
     org,
@@ -23,6 +24,8 @@ const CourseCard = ({ course, parentPath, onClick }) => {
     endDate,
     status,
     percent,
+    isEnrolledInCourse,
+    checkingEnrollment,
   } = course;
 
   // Prefetch the course detail when the user hovers over the card.
@@ -34,8 +37,8 @@ const CourseCard = ({ course, parentPath, onClick }) => {
   const progressBarPercent = useMemo(() => Math.round(percent * 100), [percent]);
 
   const linkTo = parentPath
-    ? `${parentPath}/course/${encodeURIComponent(courseKey)}`
-    : `/course/${encodeURIComponent(courseKey)}`;
+    ? `${parentPath}/course/${courseKey}`
+    : `/course/${courseKey}`;
 
   const handleViewClick = (e) => {
     if (onClick) {
@@ -71,6 +74,23 @@ const CourseCard = ({ course, parentPath, onClick }) => {
       year: 'numeric',
     })
     : null;
+
+  let buttonText = 'View';
+  let buttonVariant = 'outline-primary';
+
+  // Update the button based on enrollment status (if available).
+  if (isEnrolledInCourse === false) {
+    buttonText = 'Start';
+    buttonVariant = 'primary';
+  } else if (isEnrolledInCourse === true) {
+    buttonText = 'Resume';
+    buttonVariant = 'outline-success';
+  }
+
+  if (checkingEnrollment) {
+    buttonText = 'Loading...';
+  }
+
   return (
     <Card className="course-card p-3" onMouseEnter={handleMouseEnter}>
       <div className="lp-status-badge">
@@ -114,7 +134,9 @@ const CourseCard = ({ course, parentPath, onClick }) => {
               )}
             </div>
             {onClick ? (
-              <Button variant="outline-primary" onClick={handleViewClick}>View</Button>
+              <Button variant={buttonVariant} onClick={handleViewClick} disabled={checkingEnrollment}>
+                {buttonText}
+              </Button>
             ) : (
               <Link to={linkTo}>
                 <Button variant="outline-primary">View</Button>
@@ -129,22 +151,68 @@ const CourseCard = ({ course, parentPath, onClick }) => {
 
 CourseCard.propTypes = {
   course: PropTypes.shape({
+    id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     org: PropTypes.string.isRequired,
-    courseId: PropTypes.string.isRequired,
-    run: PropTypes.string.isRequired,
     courseImageAssetPath: PropTypes.string,
     endDate: PropTypes.string,
     status: PropTypes.string.isRequired,
     percent: PropTypes.number.isRequired,
+    isEnrolledInCourse: PropTypes.bool,
+    checkingEnrollment: PropTypes.bool,
   }).isRequired,
   parentPath: PropTypes.string,
   onClick: PropTypes.func,
 };
 
-CourseCard.defaultProps = {
-  parentPath: undefined,
-  onClick: undefined,
+export const CourseCardWithEnrollment = ({ course, learningPathId }) => {
+  const { data: enrollmentStatus, isLoading: checkingEnrollment } = useCourseEnrollmentStatus(course.id);
+  const [enrolling, setEnrolling] = useState(false);
+  const enrollCourseMutation = useEnrollCourse(learningPathId);
+
+  const courseWithEnrollment = {
+    ...course,
+    isEnrolledInCourse: enrollmentStatus?.isEnrolled || false,
+    checkingEnrollment: checkingEnrollment || enrolling,
+  };
+
+  // Defined here because calling the MFE config API from an async function can randomly fail.
+  const courseHomeUrl = buildCourseHomeUrl(course.id);
+
+  const handleCourseAction = async () => {
+    if (courseWithEnrollment.isEnrolledInCourse) {
+      window.location.href = courseHomeUrl;
+      return;
+    }
+
+    setEnrolling(true);
+    try {
+      const result = await enrollCourseMutation.mutateAsync(course.id);
+      if (result.success) {
+        window.location.href = courseHomeUrl;
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Failed to enroll in the course:', result.data?.error || 'Unknown error');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to enroll in the course:', error);
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  return (
+    <CourseCard
+      course={courseWithEnrollment}
+      onClick={handleCourseAction}
+    />
+  );
 };
 
-export default CourseCard;
+CourseCardWithEnrollment.propTypes = {
+  course: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+  }).isRequired,
+  learningPathId: PropTypes.string.isRequired,
+};
