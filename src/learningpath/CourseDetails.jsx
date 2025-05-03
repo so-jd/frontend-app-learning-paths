@@ -217,7 +217,11 @@ const CourseDetailPage = ({
   } = useCourseDetail(courseKey);
 
   if (isLoading) {
-    return <Spinner animation="border" variant="primary" />;
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
   }
 
   if (error) {

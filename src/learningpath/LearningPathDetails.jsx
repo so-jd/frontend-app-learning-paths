@@ -113,7 +113,11 @@ const LearningPathDetailPage = () => {
 
   let content;
   if (loadingDetail || loadingCourses) {
-    content = <Spinner animation="border" variant="primary" />;
+    content = (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
   } else if (detailError || !detail) {
     content = (
       <div className="p-4">
@@ -223,7 +227,6 @@ const LearningPathDetailPage = () => {
           {heroSection}
 
           <div className="p-4">
-            {loadingCourses && <Spinner animation="border" variant="primary" />}
             {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
               <p>No sub-courses found in this learning path.</p>
             )}
@@ -284,7 +287,6 @@ const LearningPathDetailPage = () => {
             </section>
             <section id="courses" className="mb-6 courses-section">
               <h2>Courses</h2>
-              {loadingCourses && <Spinner animation="border" variant="primary" />}
               {!loadingCourses && !coursesError && (!coursesForPath || coursesForPath.length === 0) && (
                 <p>No sub-courses found in this learning path.</p>
               )}
