@@ -1,3 +1,7 @@
+:root {
+  --crimson: #821122;
+}
+
 /* Make the footer stick to the bottom when there is not enough content. */
 #root {
   height: 100%;
@@ -23,15 +27,12 @@
 .learningpath-list {
   margin: 2rem;
 
-  .list-group-item {
-    font-size: 1rem;
-  }
 }
 
 .learning-path-card {
   border: 1px solid #ddd;
   border-radius: 4px;
-  border-top: 5px solid #821122 !important;
+  border-top: 5px solid var(--crimson) !important;
 
   .lp-card-image-col {
     margin-left: -16px;
@@ -55,18 +56,19 @@
     font-size: 0.9rem;
     color: #555;
   }
-}
 
-.lp-type-label {
-  color: white;
-  align-items: center;
-  font-size: 0.75rem;
-  font-weight: 600;
+  .lp-type-label {
+    color: var(--crimson);
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
 
-  .lp-type-icon {
-    background-color: #821122;
-    border-radius: 5px;
-    padding-left: 2px;
+    .lp-type-icon {
+      color: white;
+      background-color: var(--crimson);
+      border-radius: 5px;
+      padding-left: 2px;
+    }
   }
 }
 
@@ -77,17 +79,17 @@
 
   .status-secondary {
     background-color: #8996A0 !important;
-    color: #fff;
+    color: white;
   }
 
   .status-info {
     background-color: #05A59D !important;
-    color: #fff;
+    color: white;
   }
 
   .status-success {
     background-color: #52854C !important;
-    color: #fff;
+    color: white;
   }
 }
 
@@ -112,10 +114,8 @@
   .hero-section {
     padding: 2rem;
 
-    .explore-link {
+    .back-link {
       font-weight: 600;
-      margin-bottom: 1rem;
-      display: inline-block;
     }
 
     .hero-content {
@@ -148,13 +148,10 @@
       .hero-image {
         flex: 0 0 300px;
         margin-left: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
 
         img {
-          max-height: 250px;
-          width: 100%;
+          max-height: 500px;
+          width: 650px;
           object-fit: cover;
           border-radius: 4px;
         }
@@ -162,40 +159,25 @@
     }
 
     .hero-info-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-
       .info-col {
         flex: 0 0 calc(25% - 1rem);
-        margin-bottom: 1rem;
 
-        h3 {
-          font-size: 1rem;
-          font-weight: 600;
-          margin-bottom: 0.25rem;
+        .info-icon {
+          color: var(--crimson);
         }
 
-        .info-subtext {
-          color: #666;
-          font-size: 0.875rem;
+        .info-title {
+          font-weight: bold;
         }
       }
     }
   }
 
   .lp-info {
-    margin-top: 3rem;
-    margin-left: 2rem;
-    margin-right: 2rem;
 
-    section {
-      margin-bottom: 2rem;
-
-      h2 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-      }
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .courses-section {
@@ -255,7 +237,7 @@
       &:hover::after,
       &:active::after {
         height: 4px;
-        background-color: #821122;
+        background-color: var(--crimson);
       }
     }
   }
@@ -282,42 +264,6 @@
     width: 100%;
     object-fit: cover;
     border-radius: 4px;
-  }
-}
-
-.instructor-card {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 1rem;
-  background-color: #fff;
-  text-align: center;
-
-  .instructor-image {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-    margin: 0 auto;
-  }
-
-  .instructor-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-
-  .instructor-title {
-    color: #555;
-    font-weight: 500;
-  }
-
-  .instructor-org {
-    color: #888;
-    margin-bottom: 0.5rem;
-  }
-
-  .instructor-bio {
-    font-size: 0.9rem;
   }
 }
 
@@ -349,7 +295,7 @@
   left: -350px;
   width: 350px;
   height: 100vh;
-  background-color: #fff;
+  background-color: white;
   z-index: 999;
   box-shadow: -2px 0 6px rgba(0,0,0,0.15);
   transition: left 0.3s ease-in-out;
@@ -417,9 +363,9 @@
 }
 
 .lp-detail-type-label {
-  background-color: #821122;
+  background-color: var(--crimson);
   max-width: 10rem;
-  color: #fff;
+  color: white;
   border-radius: 5px;
   padding: 2px 2px;
   align-items: center;

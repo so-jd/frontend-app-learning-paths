@@ -95,7 +95,7 @@ const LearningPathCard = ({ learningPath }) => {
             <span className="lp-type-icon d-inline-flex align-items-center justify-content-center mr-1">
               <Icon src={FormatListBulleted} className="mr-1" />
             </span>
-            <span style={{ color: '#821122' }}>Learning Path</span>
+            <span>Learning Path</span>
           </div>
           <Card.Header className="p-0 mb-2" title={displayName} />
           {subtitleLine && (

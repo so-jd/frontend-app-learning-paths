@@ -60,7 +60,7 @@ const Dashboard = () => {
   }, [filteredItems, currentPage]);
 
   return (
-    <div className="learningpath-list">
+    <div className="learningpath-list m-4.5">
       {isLoading ? (
         <div className="d-flex justify-content-center align-items-center vh-100">
           <Spinner animation="border" variant="primary" />

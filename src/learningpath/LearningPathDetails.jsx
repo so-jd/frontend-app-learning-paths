@@ -147,12 +147,12 @@ const LearningPathDetailPage = () => {
     const heroSection = (
       <div className="hero-section p-4">
         <div className="mb-5">
-          <Link to="/" style={{ fontWeight: 600 }} className="d-flex">
+          <Link to="/" className="d-flex back-link">
             <Icon src={ChevronLeft} />
             <span>Go Back</span>
           </Link>
         </div>
-        <Row className="border-bottom border-light">
+        <Row className="border-bottom border-light hero-content">
           <Col xs={12} md={8}>
             <div className="lp-detail-type-label d-flex text-uppercase mb-2">
               <Icon src={FormatListBulleted} className="mr-1" />
@@ -165,58 +165,50 @@ const LearningPathDetailPage = () => {
               </p>
             )}
           </Col>
-          <Col xs={12} md={4} className="d-flex align-items-center justify-content-center">
-            {image && (
-            <img
-              src={image}
-              alt={displayName}
-              style={{
-                width: '650px', borderRadius: '4px', maxHeight: '500px', objectFit: 'cover',
-              }}
-            />
-            )}
+          <Col xs={12} md={4} className="d-flex align-items-center justify-content-center hero-image">
+            {image && (<img src={image} alt={displayName} />)}
           </Col>
         </Row>
-        <Row className="mt-4">
+        <Row className="mt-4 d-flex flex-wrap justify-content-between hero-info-row">
           {accessUntilDate && (
-            <Col xs={6} md={3} className="mb-3">
+            <Col xs={6} md={3} className="mb-3 info-col">
               <div className="d-flex align-items-center">
-                <Icon src={AccessTimeFilled} className="mr-4 mb-3" style={{ color: '#821122' }} />
+                <Icon src={AccessTimeFilled} className="mr-4 mb-3 info-icon" />
                 <div>
-                  <p className="mb-0 font-weight-bold">
+                  <p className="mb-0 info-title">
                     {accessUntilDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
-                  <p className="text-muted mb-0">Access ends</p>
+                  <p className="text-muted mb-0 info-subtext">Access ends</p>
                 </div>
               </div>
             </Col>
           )}
-          <Col xs={6} md={3} className="mb-3">
+          <Col xs={6} md={3} className="mb-3 info-col">
             <div className="d-flex align-items-center">
-              <Icon src={Award} className="mr-4 mb-4" style={{ color: '#821122' }} />
+              <Icon src={Award} className="mr-4 mb-4 info-icon" />
               <div>
-                <p className="mb-1 font-weight-bold">Certificate</p>
-                <p className="text-muted">Earn a certificate</p>
+                <p className="mb-1 info-title">Certificate</p>
+                <p className="text-muted info-subtext">Earn a certificate</p>
               </div>
             </div>
           </Col>
-          <Col xs={6} md={3} className="mb-3">
+          <Col xs={6} md={3} className="mb-3 info-col">
             <div className="d-flex align-items-center">
-              <Icon src={Calendar} className="mr-4 mb-4" style={{ color: '#821122' }} />
+              <Icon src={Calendar} className="mr-4 mb-4 info-icon" />
               <div>
-                <p className="mb-1 font-weight-bold">
+                <p className="mb-1 info-title">
                   {durationText || 'Duration not available'}
                 </p>
-                <p className="text-muted">Duration</p>
+                <p className="text-muted info-subtext">Duration</p>
               </div>
             </div>
           </Col>
-          <Col xs={6} md={3} className="mb-3">
+          <Col xs={6} md={3} className="mb-3 info-col">
             <div className="d-flex align-items-center">
-              <Icon src={Person} className="mr-4 mb-4" style={{ color: '#821122' }} />
+              <Icon src={Person} className="mr-4 mb-4 info-icon" />
               <div>
-                <p className="mb-1 font-weight-bold">Self-paced</p>
-                <p className="text-muted">Progress at your own speed</p>
+                <p className="mb-1 info-title">Self-paced</p>
+                <p className="text-muted info-subtext">Progress at your own speed</p>
               </div>
             </div>
           </Col>
@@ -282,7 +274,7 @@ const LearningPathDetailPage = () => {
               })()}
             </Button>
           </div>
-          <div className="p-4 lp-info">
+          <div className="p-4 mt-3 ml-2 mr-2 lp-info">
             <section id="about" className="mb-6">
               <h2>About</h2>
               <p>
