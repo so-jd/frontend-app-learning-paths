@@ -88,11 +88,11 @@ const Dashboard = () => {
             <hr className="mt-0 mb-4" />
             <Row>
               {paginatedItems.map(item => (item.type === 'course' ? (
-                <Col key={item.id} xs={12} lg={8} className="mb-4 ml-6">
+                <Col key={item.id} xs={12} lg={8} className={`mb-4 ${showFilters ? '' : 'mx-lg-6'}`}>
                   <CourseCard course={item} />
                 </Col>
               ) : (
-                <Col key={item.key} xs={12} lg={8} className="mb-4 ml-6">
+                <Col key={item.key} xs={12} lg={8} className={`mb-4 ${showFilters ? '' : 'mx-lg-6'}`}>
                   <LearningPathCard learningPath={item} />
                 </Col>
               )))}
