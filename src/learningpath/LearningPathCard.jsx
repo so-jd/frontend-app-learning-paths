@@ -73,7 +73,7 @@ const LearningPathCard = ({ learningPath }) => {
     : subtitle || duration || '';
 
   return (
-    <Card className="learning-path-card p-3 position-relative" onMouseEnter={handleMouseEnter}>
+    <Card className="dashboard-card learning-path-card p-3 position-relative" onMouseEnter={handleMouseEnter}>
       <div className="lp-status-badge">
         <Badge variant={statusVariant} className={`d-flex text-uppercase align-items-center status-${statusVariant}`}>
           <Icon src={statusIcon} className="mr-1" />
@@ -81,18 +81,18 @@ const LearningPathCard = ({ learningPath }) => {
         </Badge>
       </div>
       <Row>
-        <Col xs={12} md={4} className="lp-card-image-col">
+        <Col xs={12} md={4} className="image-col">
           {image && (
             <Card.ImageCap
               src={image}
               alt={displayName}
-              className="lp-card-image"
+              className="image"
             />
           )}
         </Col>
         <Col xs={12} md={8}>
-          <div className="lp-type-label text-uppercase mb-2 d-flex align-items-center">
-            <span className="lp-type-icon d-inline-flex align-items-center justify-content-center mr-1">
+          <div className="type-label text-uppercase mb-2 d-flex align-items-center">
+            <span className="type-icon d-inline-flex align-items-center justify-content-center mr-1">
               <Icon src={FormatListBulleted} className="mr-1" />
             </span>
             <span>Learning Path</span>
@@ -112,7 +112,7 @@ const LearningPathCard = ({ learningPath }) => {
             />
           )}
           <Card.Footer className="d-flex align-items-center">
-            <div className="lp-meta d-flex flex-wrap mr-auto mb-2">
+            <div className="meta d-flex flex-wrap mr-auto mb-2">
               {numCourses && (
                 <div className="mr-3 d-flex align-items-center">
                   <Icon src={FormatListBulleted} className="mr-1" />

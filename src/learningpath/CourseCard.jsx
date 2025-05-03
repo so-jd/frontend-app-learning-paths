@@ -94,7 +94,7 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
   }
 
   return (
-    <Card className="course-card p-3" onMouseEnter={handleMouseEnter}>
+    <Card className="dashboard-card course-card p-3" onMouseEnter={handleMouseEnter}>
       <div className="lp-status-badge">
         <Badge variant={statusVariant} className={`d-flex text-uppercase align-items-center status-${statusVariant}`}>
           <Icon src={statusIcon} className="mr-1" />
@@ -102,18 +102,19 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
         </Badge>
       </div>
       <Row>
-        <Col xs={12} md={4} className="course-card-image-col">
+        <Col xs={12} md={4} className="image-col">
           {courseImageAssetPath && (
           <Card.ImageCap
             src={buildAssetUrl(courseImageAssetPath)}
             alt={name}
             style={{ objectFit: 'cover' }}
+            className="image"
           />
           )}
         </Col>
         <Col xs={12} md={8}>
-          <div className="course-type-label text-uppercase mb-2 d-flex align-items-center">
-            <span className="course-type-icon d-inline-flex align-items-center justify-content-center mr-1">
+          <div className="type-label text-uppercase mb-2 d-flex align-items-center">
+            <span className="type-icon d-inline-flex align-items-center justify-content-center mr-1">
               <Icon src={LmsBook} className="mr-1" />
             </span>
             <span style={{ color: '#8C8179' }}>Course</span>
@@ -129,9 +130,9 @@ export const CourseCard = ({ course, parentPath, onClick }) => {
             />
           )}
           <Card.Footer className="p-0 d-flex align-items-center">
-            <div className="d-flex flex-wrap mr-auto mb-2">
+            <div className="meta d-flex flex-wrap mr-auto mb-2">
               {endDateFormatted && (
-                <div className="mr-3 d-flex align-items-center" style={{ fontSize: '0.9rem' }}>
+                <div className="mr-3 d-flex align-items-center">
                   <Icon src={AccessTime} className="mr-1" />
                   Access until {endDateFormatted}
                 </div>

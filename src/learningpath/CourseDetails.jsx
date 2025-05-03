@@ -104,7 +104,7 @@ const CourseDetailContent = ({
             <Card.ImageCap
               src={buildAssetUrl(courseImageAssetPath)}
               alt={name}
-              className="course-card-image"
+              className="course-detail-image"
             />
             )}
           </Col>
