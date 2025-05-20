@@ -72,9 +72,16 @@
       border-top: 5px solid var(--crimson) !important;
   }
 
-  .pgn__card-wrapper-image-cap .pgn__card-logo-cap {
-    top: 1rem;
-    left: 1rem !important;
+  .pgn__card-wrapper-image-cap {
+    .pgn__card-image-cap {
+      /* The default (`auto`) value does not work in Safari. */
+      width: 240px !important;
+    }
+
+    .pgn__card-logo-cap {
+      top: 1rem;
+      left: 1rem !important;
+    }
   }
 
   .pgn__card-body {
@@ -235,6 +242,9 @@
 
         .pgn__card-image-cap {
           border-radius: 0.375rem !important;
+
+          /* The default (`auto`) value does not work in Safari. */
+          width: 100% !important;
         }
 
         .pgn__card-logo-cap {
