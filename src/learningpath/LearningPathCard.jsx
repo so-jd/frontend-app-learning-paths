@@ -26,6 +26,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
     duration,
     numCourses,
     status,
+    minDate,
     maxDate,
     percent,
     org,
@@ -59,17 +60,29 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
       buttonText = 'Resume';
       break;
     default:
-      statusVariant = 'dark';
-      statusIcon = 'fa-circle';
       break;
   }
 
+  let accessText = '';
   const currentDate = new Date();
-  const accessDateObj = new Date(maxDate);
-  const accessText = currentDate > accessDateObj
-    ? 'Access ended'
-    : `Access until ${accessDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
+  // Determine access text and override button text based on access dates.
+  if (minDate && minDate > currentDate) {
+    // Learning path will start in the future.
+    const minDateStr = minDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    accessText = <>Access starts on <b>{minDateStr}</b></>;
+    buttonText = 'View';
+  } else if (maxDate) {
+    const maxDateStr = maxDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (currentDate > maxDate) {
+      // Learning path has ended.
+      accessText = <>Access ended on <b>{maxDateStr}</b></>;
+      buttonText = 'View';
+    } else {
+      // Learning path is currently available.
+      accessText = <>Access until <b>{maxDateStr}</b></>;
+    }
+  }
   const subtitleLine = subtitle && duration
     ? `${subtitle} • ${duration} days`
     : subtitle || duration || '';
@@ -104,7 +117,7 @@ const LearningPathCard = ({ learningPath, showFilters = false }) => {
             {numCourses && (
               <Chip iconBefore={FormatListBulleted} className="border-0 p-0">{numCourses} courses</Chip>
             )}
-            {maxDate && (
+            {accessText && (
               <Chip iconBefore={AccessTime} className="border-0 p-0">{accessText}</Chip>
             )}
           </Card.Section>
@@ -126,7 +139,8 @@ LearningPathCard.propTypes = {
     duration: PropTypes.string,
     numCourses: PropTypes.number,
     status: PropTypes.string.isRequired,
-    maxDate: PropTypes.string,
+    minDate: PropTypes.instanceOf(Date),
+    maxDate: PropTypes.instanceOf(Date),
     percent: PropTypes.number,
     org: PropTypes.string,
   }).isRequired,

@@ -11,6 +11,7 @@ import {
   LmsCompletionSolid,
   Timelapse,
 } from '@openedx/paragon/icons';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { buildAssetUrl } from '../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
@@ -25,12 +26,14 @@ export const CourseCard = ({
     name,
     org,
     courseImageAssetPath,
+    startDate,
     endDate,
     status,
     percent,
     checkingEnrollment,
   } = course;
 
+  const { administrator } = getAuthenticatedUser();
   const { isSmall, isMedium } = useScreenSize();
   const orientation = (showFilters && (isSmall || isMedium)) || (!showFilters && isSmall) ? 'vertical' : 'horizontal';
 
@@ -63,23 +66,39 @@ export const CourseCard = ({
       buttonText = 'Resume';
       break;
     default:
-      statusVariant = 'dark';
-      statusIcon = 'fa-circle';
       break;
   }
-  const endDateFormatted = endDate
-    ? new Date(endDate).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-    : null;
 
   if (checkingEnrollment) {
     buttonText = 'Loading...';
   }
 
-  const disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
+  let disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
+
+  let accessText = '';
+  const currentDate = new Date();
+
+  const startDateObj = startDate ? new Date(startDate) : null;
+  const endDateObj = endDate ? new Date(endDate) : null;
+
+  // Determine access text and override button text based on access dates.
+  if (startDateObj && startDateObj > currentDate) {
+    // Course will start in the future.
+    const startDateStr = startDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    accessText = <>Access starts on <b>{startDateStr}</b></>;
+    buttonText = 'Start';
+    disableStartButton = disableStartButton || !administrator;
+  } else if (endDateObj) {
+    const endDateStr = endDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (currentDate > endDateObj) {
+      // Course has ended.
+      accessText = <>Access ended on <b>{endDateStr}</b></>;
+      buttonText = 'View';
+    } else {
+      // Course is currently available.
+      accessText = <>Access until <b>{endDateStr}</b></>;
+    }
+  }
 
   const { data: organizations = {} } = useOrganizations();
   const orgData = useMemo(() => ({
@@ -122,8 +141,8 @@ export const CourseCard = ({
         </Card.Section>
         <Card.Footer orientation="horizontal" className="pt-3 pb-3 justify-content-between">
           <Col className="p-0">
-            {endDateFormatted && (
-              <Chip iconBefore={AccessTime} className="border-0 p-0">Access until <b>{endDateFormatted}</b></Chip>
+            {accessText && (
+              <Chip iconBefore={AccessTime} className="border-0 p-0">{accessText}</Chip>
             )}
           </Col>
           {onClickViewButton && (
@@ -135,7 +154,7 @@ export const CourseCard = ({
             </Button>
           ) : (
             <Link to={linkTo}>
-              <Button variant="outline-primary">{buttonText}</Button>
+              <Button variant="outline-primary" disabled={disableStartButton}>{buttonText}</Button>
             </Link>
           )}
         </Card.Footer>
@@ -150,6 +169,7 @@ CourseCard.propTypes = {
     name: PropTypes.string.isRequired,
     org: PropTypes.string.isRequired,
     courseImageAssetPath: PropTypes.string,
+    startDate: PropTypes.string,
     endDate: PropTypes.string,
     status: PropTypes.string.isRequired,
     percent: PropTypes.number.isRequired,
