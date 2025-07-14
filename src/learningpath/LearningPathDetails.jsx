@@ -128,13 +128,12 @@ const LearningPathDetailPage = () => {
       displayName,
       image,
       subtitle,
-      durationInDays,
+      duration,
+      timeCommitment,
       requiredSkills,
       description,
       enrollmentDate,
     } = detail;
-
-    const durationText = durationInDays ? `${durationInDays} days` : null;
 
     // Hero section - same for both full view and enrolled view.
     const heroSection = (
@@ -178,9 +177,9 @@ const LearningPathDetailPage = () => {
             <Icon src={Calendar} className="mr-4 mb-4" />
             <div>
               <p className="mb-0 font-weight-bold">
-                {durationText || 'Duration not available'}
+                {duration || 'Duration not available'}
               </p>
-              <p className="mb-2 text-muted info-subtext">Duration</p>
+              <p className="mb-2 text-muted info-subtext">{timeCommitment || 'Duration'}</p>
             </div>
           </div>
           <div className="d-flex">
