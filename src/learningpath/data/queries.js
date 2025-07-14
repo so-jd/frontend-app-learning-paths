@@ -349,7 +349,7 @@ export const useEnrollLearningPath = () => {
           if (oldData) {
             return {
               ...oldData,
-              isEnrolled: true,
+              enrollmentDate: Date.now(),
             };
           }
           return oldData;
@@ -361,7 +361,7 @@ export const useEnrollLearningPath = () => {
         (oldData) => {
           if (!oldData) { return oldData; }
           return oldData.map(path => (path.key === learningPathId
-            ? { ...path, isEnrolled: true }
+            ? { ...path, enrollmentDate: Date.now() }
             : path));
         },
       );

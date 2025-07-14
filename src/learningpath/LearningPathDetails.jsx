@@ -42,7 +42,7 @@ const LearningPathDetailPage = () => {
 
   useEffect(() => {
     if (detail && activeTab === null) {
-      setActiveTab(detail.isEnrolled ? 'courses' : 'about');
+      setActiveTab(detail.enrollmentDate ? 'courses' : 'about');
     }
   }, [detail, activeTab]);
 
@@ -84,7 +84,7 @@ const LearningPathDetailPage = () => {
   };
 
   const handleEnrollClick = async () => {
-    if (detail && !detail.isEnrolled) {
+    if (detail && !detail.enrollmentDate) {
       setEnrolling(true);
       try {
         await enrollMutation.mutateAsync(key);
@@ -131,7 +131,7 @@ const LearningPathDetailPage = () => {
       durationInDays,
       requiredSkills,
       description,
-      isEnrolled,
+      enrollmentDate,
     } = detail;
 
     const durationText = durationInDays ? `${durationInDays} days` : null;
@@ -217,14 +217,14 @@ const LearningPathDetailPage = () => {
             )}
           </Nav>
           <Button
-            variant={isEnrolled ? 'secondary' : 'primary'}
+            variant={enrollmentDate ? 'secondary' : 'primary'}
             className="ml-auto rounded-0 px-5.5 align-self-stretch"
             onClick={handleEnrollClick}
-            disabled={enrolling || isEnrolled}
+            disabled={enrolling || enrollmentDate}
           >
             {(() => {
               if (enrolling) { return 'Enrolling...'; }
-              if (isEnrolled) { return 'Enrolled'; }
+              if (enrollmentDate) { return 'Enrolled'; }
               return 'Enroll';
             })()}
           </Button>
@@ -252,7 +252,7 @@ const LearningPathDetailPage = () => {
                       <CourseCardWithEnrollment
                         course={course}
                         learningPathId={key}
-                        isEnrolledInLearningPath={isEnrolled}
+                        enrollmentDateInLearningPath={enrollmentDate}
                         onClick={() => handleCourseViewButton(course.id)}
                       />
                     </div>
