@@ -149,7 +149,8 @@ const LearningPathDetailPage = () => {
             <Card.Section className="pl-5 pr-6">
               <Chip iconBefore={FormatListBulleted} className="lp-chip">LEARNING PATH</Chip>
               <h1 className="my-3 mt-4.5">{displayName}</h1>
-              <p className="text-muted">{subtitle}</p>
+              {/* eslint-disable-next-line react/no-danger */}
+              <div className="text-muted" dangerouslySetInnerHTML={{ __html: subtitle || 'No subtitle available.' }} />
             </Card.Section>
           </Card.Body>
           <Card.ImageCap src={image} logoSrc={orgData.logo} />

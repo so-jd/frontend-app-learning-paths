@@ -92,7 +92,8 @@ const CourseDetailContent = ({
             <Card.Section className="pl-5 pr-6">
               <Chip iconBefore={LmsBook} className="course-chip">COURSE</Chip>
               <h1 className="my-3 mt-4.5">{name}</h1>
-              <p className="text-muted">{shortDescription}</p>
+              {/* eslint-disable-next-line react/no-danger */}
+              <div className="text-muted" dangerouslySetInnerHTML={{ __html: shortDescription || 'No description available.' }} />
             </Card.Section>
           </Card.Body>
           <Card.ImageCap src={buildAssetUrl(courseImageAssetPath)} logoSrc={orgData.logo} />
