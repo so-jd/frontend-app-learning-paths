@@ -110,8 +110,8 @@ const CourseDetailContent = ({
           <div className="d-flex align-items-center">
             <Icon src={Award} className="mr-4 mb-4" />
             <div>
-              <p className="mb-1 font-weight-bold">Earn a certificate</p>
-              <p className="text-muted">Courses include certification</p>
+              <p className="mb-1 font-weight-bold">Certificate</p>
+              <p className="text-muted">Earn a certificate</p>
             </div>
           </div>
           {duration && (
