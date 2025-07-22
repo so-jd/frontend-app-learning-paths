@@ -73,7 +73,8 @@ export const CourseCard = ({
     buttonText = 'Loading...';
   }
 
-  let disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
+  const disableStartButton = checkingEnrollment || isEnrolledInLearningPath === false;
+  let showStartButton = true;
 
   let accessText = '';
   const currentDate = new Date();
@@ -87,7 +88,7 @@ export const CourseCard = ({
     const startDateStr = startDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     accessText = <>Access starts on <b>{startDateStr}</b></>;
     buttonText = 'Start';
-    disableStartButton = disableStartButton || !administrator;
+    showStartButton = administrator;
   } else if (endDateObj) {
     const endDateStr = endDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     if (currentDate > endDateObj) {
@@ -156,14 +157,16 @@ export const CourseCard = ({
           {onClickViewButton && (
             <Button variant="outline-primary" onClick={onClickViewButton} className="mr-2">More Info</Button>
           )}
-          {onClick ? (
-            <Button variant="outline-primary" onClick={onClick} disabled={disableStartButton}>
-              {buttonText}
-            </Button>
-          ) : (
-            <Link to={linkTo}>
-              <Button variant="outline-primary" disabled={disableStartButton}>{buttonText}</Button>
-            </Link>
+          {showStartButton && (
+            onClick ? (
+              <Button variant="outline-primary" onClick={onClick} disabled={disableStartButton}>
+                {buttonText}
+              </Button>
+            ) : (
+              <Link to={linkTo}>
+                <Button variant="outline-primary" disabled={disableStartButton}>{buttonText}</Button>
+              </Link>
+            )
           )}
         </Card.Footer>
       </Card.Body>
