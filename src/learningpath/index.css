@@ -103,10 +103,6 @@
       margin-left: 350px;
     }
 
-    &.hidden {
-      display: none;
-    }
-
     button {
       margin-top: 1rem;
       margin-bottom: 20px;
