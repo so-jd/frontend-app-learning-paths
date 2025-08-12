@@ -240,6 +240,11 @@
     }
   }
 
+  .pgn__card-wrapper-image-cap {
+    min-height: 140px;
+    background-color: #ebe7e7;
+  }
+
   /* Adjust box shadow and turn off the border radius for the bottom corners when there is an alert below the card. */
   &:has(+ [role="alert"]) {
     border-bottom-left-radius: 0;
