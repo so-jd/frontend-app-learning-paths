@@ -153,15 +153,6 @@ const LearningPathDetailPage = () => {
                 <span>Go Back</span>
               </Link>
             </Card.Section>
-            {isSmall && (
-              <Card.ImageCap
-                src={image}
-                srcAlt={`${displayName} learning path image`}
-                logoSrc={orgData.logo}
-                logoAlt={`${orgData.name} logo`}
-                className="mb-4"
-              />
-            )}
             <Card.Section className="px-4 py-4 py-md-3.5">
               <Chip iconBefore={FormatListBulleted} className="lp-chip">LEARNING PATH</Chip>
               <h1 className="my-3 mt-4.5">{displayName}</h1>
@@ -169,14 +160,6 @@ const LearningPathDetailPage = () => {
               <div className="text-muted" dangerouslySetInnerHTML={{ __html: subtitle || 'No subtitle available.' }} />
             </Card.Section>
           </Card.Body>
-          {!isSmall && (
-            <Card.ImageCap
-              src={image}
-              srcAlt={`${displayName} learning path image`}
-              logoSrc={orgData.logo}
-              logoAlt={`${orgData.name} logo`}
-            />
-          )}
         </Card>
         {isSmall && (
           <div className="mx-4">

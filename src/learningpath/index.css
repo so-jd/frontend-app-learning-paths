@@ -189,7 +189,7 @@
 
         .pgn__chip {
           &:not(.status-chip) {
-            background-color: unset;
+            background-color: var(--crimson);
 
             .pgn__chip__label {
               display: none;
