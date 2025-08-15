@@ -7,3 +7,8 @@
 
 @import "~@edx/frontend-component-header/dist/index";
 @import "~@edx/frontend-component-footer/dist/footer";
+
+.logo {
+  // copy from legacy dashboard
+  height: 40px;
+}
