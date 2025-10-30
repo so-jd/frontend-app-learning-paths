@@ -1,7 +1,7 @@
 import React, {
   useState, useMemo, useEffect, useRef, useCallback,
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Spinner, Col, Button, Pagination, Icon, IconButton, SearchField, Image, Bubble, Alert,
 } from '@openedx/paragon';
@@ -16,6 +16,7 @@ import noResultsSVG from '../assets/no_results.svg';
 
 const Dashboard = () => {
   const { isSmall } = useScreenSize();
+  const navigate = useNavigate();
 
   const {
     data: learningPaths,
@@ -304,15 +305,23 @@ const Dashboard = () => {
               <div className="dashboard-header d-flex justify-content-between align-items-center">
                 <h2>My Learning</h2>
                 {!isSmall ? (
-                  <SearchField
-                    onClear={() => setSearchQuery('')}
-                    onChange={setSearchQuery}
-                    onSubmit={() => {}}
-                    value={searchQuery}
-                    placeholder="Search"
-                  />
+                  <div className="d-flex align-items-center gap-2">
+                    <SearchField
+                      onClear={() => setSearchQuery('')}
+                      onChange={setSearchQuery}
+                      onSubmit={() => {}}
+                      value={searchQuery}
+                      placeholder="Search"
+                    />
+                    <Button variant="brand" onClick={() => navigate('/explore')}>
+                      Explore
+                    </Button>
+                  </div>
                 ) : (
-                  <div>
+                  <div className="d-flex align-items-center gap-2">
+                    <Button variant="brand" size="sm" onClick={() => navigate('/explore')}>
+                      Explore
+                    </Button>
                     <IconButton src={Search} iconAs={Icon} variant="black" alt="Search" onClick={handleMobileSearchClick} />
                     <div className="d-inline-block">
                       <IconButton src={FilterList} iconAs={Icon} variant="black" alt="Filter" onClick={() => setShowFilters(true)} />

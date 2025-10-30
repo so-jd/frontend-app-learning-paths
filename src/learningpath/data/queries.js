@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import * as api from './api';
 import {
   addCompletionStatus,
@@ -19,6 +19,7 @@ export const QUERY_KEYS = {
   COURSE_COMPLETION: (courseId) => ['courseCompletion', courseId],
   COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
   ORGANIZATIONS: ['organizations'],
+  COURSE_DISCOVERY: (params) => ['courseDiscovery', params],
 };
 
 // Stale time configurations
@@ -399,3 +400,58 @@ export const useOrganizations = () => useQuery({
   },
   staleTime: STALE_TIMES.ORGANIZATIONS,
 });
+
+export const useCourseDiscovery = ({ searchString = '', pageSize = 20, pageIndex = 0 } = {}) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_DISCOVERY({ searchString, pageSize, pageIndex }),
+  queryFn: () => api.fetchCourseDiscovery({ searchString, pageSize, pageIndex }),
+  staleTime: STALE_TIMES.COURSES,
+});
+
+// Hook that merges course discovery results with user enrollment status
+export const useCourseDiscoveryWithEnrollments = ({ searchString = '', pageSize = 20, pageIndex = 0 } = {}) => {
+  const { data: discoveryData, isLoading: isLoadingDiscovery, error: discoveryError } = useCourseDiscovery({
+    searchString,
+    pageSize,
+    pageIndex,
+  });
+
+  const { data: dashboardData, isLoading: isLoadingDashboard } = useLearnerDashboard();
+
+  // Merge enrollment data into discovery results
+  const mergedData = useMemo(() => {
+    if (!discoveryData?.courses) {
+      return discoveryData;
+    }
+
+    // If dashboard data isn't loaded yet, return discovery data without enrollment info
+    if (!dashboardData?.courses) {
+      return discoveryData;
+    }
+
+    // Create a map of enrolled course IDs for O(1) lookup
+    const enrolledCoursesMap = new Map(
+      dashboardData.courses.map(course => [course.id, course]),
+    );
+
+    // Merge enrollment status into discovery courses
+    const coursesWithEnrollment = discoveryData.courses.map(course => {
+      const enrolledCourse = enrolledCoursesMap.get(course.courseKey);
+      return {
+        ...course,
+        enrollmentDate: enrolledCourse?.enrollmentDate || null,
+        isEnrolled: !!enrolledCourse,
+      };
+    });
+
+    return {
+      ...discoveryData,
+      courses: coursesWithEnrollment,
+    };
+  }, [discoveryData, dashboardData]);
+
+  return {
+    data: mergedData,
+    isLoading: isLoadingDiscovery || isLoadingDashboard,
+    error: discoveryError,
+  };
+};

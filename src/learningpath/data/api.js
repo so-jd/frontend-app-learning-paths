@@ -183,3 +183,86 @@ export async function fetchOrganizations() {
     logo: org.logo,
   })));
 }
+
+export async function fetchCourseDiscovery({ searchString = '', pageSize = 20, pageIndex = 0 } = {}) {
+  const client = getAuthenticatedHttpClient();
+
+  try {
+    const lmsBaseUrl = getConfig().LMS_BASE_URL;
+    const url = `${lmsBaseUrl}/search/course_discovery/`;
+
+    // eslint-disable-next-line no-console
+    console.log('=== Course Discovery Debug Info ===');
+    // eslint-disable-next-line no-console
+    console.log('LMS_BASE_URL:', lmsBaseUrl);
+    // eslint-disable-next-line no-console
+    console.log('Full API URL:', url);
+    // eslint-disable-next-line no-console
+    console.log('Attempting to fetch courses...');
+
+    // Create form data as expected by the endpoint (same format as curl --data-raw)
+    const formData = new URLSearchParams();
+    formData.append('search_string', searchString);
+    formData.append('page_size', pageSize.toString());
+    formData.append('page_index', pageIndex.toString());
+
+    const response = await client.post(
+      url,
+      formData.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      },
+    );
+
+    const { results = [] } = response.data;
+
+    // Transform the discovery results - note the data structure from the search endpoint
+    const courses = results.map(result => {
+      const course = result.data || {};
+      return {
+        id: course.course,
+        courseKey: course.course,
+        name: course.content?.number || 'Untitled Course',
+        displayName: course.content?.display_name || 'Untitled Course',
+        shortDescription: course.content?.short_description || '',
+        description: course.content?.overview || '',
+        courseImageUrl: course.image_url || '',
+        org: course.org || course.course?.split(':')[1]?.split('+')[0] || '',
+        number: course.number || course.course?.split(':')[1]?.split('+')[1] || '',
+        startDate: course.start,
+        endDate: course.end,
+        enrollmentStart: course.enrollment_start,
+        enrollmentEnd: course.enrollment_end,
+        type: 'course',
+        isDiscovery: true,
+      };
+    });
+
+    return {
+      courses,
+      total: response.data.pagination?.count || courses.length,
+      pageIndex,
+      pageSize,
+    };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching course catalog:', error);
+    // eslint-disable-next-line no-console
+    console.error('Error details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      method: error.config?.method,
+    });
+
+    return {
+      courses: [],
+      total: 0,
+      pageIndex,
+      pageSize,
+    };
+  }
+}
