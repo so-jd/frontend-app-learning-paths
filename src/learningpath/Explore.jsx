@@ -19,8 +19,7 @@ const Explore = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [selectedDurations, setSelectedDurations] = useState([]);
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [pageSize] = useState(100); // Load more courses
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [isAboutPanelOpen, setIsAboutPanelOpen] = useState(false);
@@ -46,52 +45,53 @@ const Explore = () => {
   const discoveryCourses = useMemo(() => discoveryData?.courses || [], [discoveryData]);
   const isLoading = isLoadingDiscovery || isLoadingPaths;
 
-  // Combine all items
-  const allItems = useMemo(() => [...discoveryCourses, ...(learningPaths || [])], [discoveryCourses, learningPaths]);
-
-  // Subject options - these should be dynamic based on your data
-  const subjects = [
-    'Artificial Intelligence',
-    'Biochemistry',
-    'Genetics',
-    'Immunology',
-    'Pharmacology',
-    'Physiology',
-  ];
-
-  // Duration options
-  const durations = [
-    { label: '0 to 1 week', min: 0, max: 1 },
-    { label: '1 to 2 weeks', min: 1, max: 2 },
-    { label: '2 to 4 weeks', min: 2, max: 4 },
-    { label: '4 to 8 weeks', min: 4, max: 8 },
-    { label: '8 to 12 weeks', min: 8, max: 12 },
-    { label: '12+ weeks', min: 12, max: Infinity },
-  ];
-
-  const handleSubjectChange = (subject, isChecked) => {
-    setSelectedSubjects(prev => {
-      if (isChecked) {
-        return [...prev, subject];
+  // Add status to items based on enrollment and completion
+  const itemsWithStatus = useMemo(() => {
+    const items = [...discoveryCourses, ...(learningPaths || [])];
+    return items.map(item => {
+      if (!item.enrollmentDate) {
+        return { ...item, status: 'not-enrolled' };
       }
-      return prev.filter(s => s !== subject);
+
+      // Check completion status
+      const percent = item.percent || 0;
+      if (percent >= 100) {
+        return { ...item, status: 'completed' };
+      } else if (percent > 0) {
+        return { ...item, status: 'in-progress' };
+      } else {
+        return { ...item, status: 'enrolled' };
+      }
+    });
+  }, [discoveryCourses, learningPaths]);
+
+  // Status options
+  const statusOptions = [
+    { value: 'not-enrolled', label: 'Not Enrolled' },
+    { value: 'enrolled', label: 'Enrolled' },
+    { value: 'in-progress', label: 'In Progress' },
+    { value: 'completed', label: 'Completed' },
+  ];
+
+  const handleStatusChange = (statusValue, isChecked) => {
+    setSelectedStatuses(prev => {
+      if (isChecked) {
+        return [...prev, statusValue];
+      }
+      return prev.filter(s => s !== statusValue);
     });
   };
 
-  const handleDurationChange = (duration, isChecked) => {
-    setSelectedDurations(prev => {
-      if (isChecked) {
-        return [...prev, duration];
-      }
-      return prev.filter(d => d.label !== duration.label);
-    });
-  };
-
-  // Filter items based on tab, search, subjects, and durations
-  const filteredItems = useMemo(() => allItems.filter(item => {
+  // Filter items based on tab, search, and status
+  const filteredItems = useMemo(() => itemsWithStatus.filter(item => {
     // Tab filter
     if (selectedTab === 'courses' && item.type !== 'course') { return false; }
     if (selectedTab === 'learning_paths' && item.type !== 'learning_path') { return false; }
+
+    // Status filter - if any statuses are selected, only show items matching those statuses
+    if (selectedStatuses.length > 0 && !selectedStatuses.includes(item.status)) {
+      return false;
+    }
 
     // Search is handled by the API for discovery courses
     // Only apply local search filter for learning paths when there's no API search
@@ -101,21 +101,8 @@ const Explore = () => {
       if (!searchMatch) { return false; }
     }
 
-    // Subject filter (if subjects are tagged in your data)
-    // For now, this is a placeholder - you'll need to add subject tags to your data
-    if (selectedSubjects.length > 0) {
-      // Implement subject filtering based on your data structure
-      // return selectedSubjects.some(subject => item.subjects?.includes(subject));
-    }
-
-    // Duration filter (if duration data is available)
-    if (selectedDurations.length > 0) {
-      // Implement duration filtering based on your data structure
-      // You might need to calculate duration from start/end dates or use a duration field
-    }
-
     return true;
-  }), [allItems, selectedTab, searchQuery, selectedSubjects, selectedDurations]);
+  }), [itemsWithStatus, selectedTab, selectedStatuses, searchQuery]);
 
   const handleCardClick = (item) => {
     const isLearningPath = item.type === 'learning_path';
@@ -234,7 +221,7 @@ const Explore = () => {
               ) : (
                 <Badge variant="light" className="text-uppercase">COURSE</Badge>
               )}
-              {item.enrollmentDate && (
+              {item.status === 'enrolled' && (
                 <Badge
                   variant="success"
                   className="text-uppercase d-flex align-items-center enrolled-badge"
@@ -242,6 +229,26 @@ const Explore = () => {
                 >
                   <Icon src={CheckCircle} style={{ width: '14px', height: '14px' }} />
                   ENROLLED
+                </Badge>
+              )}
+              {item.status === 'in-progress' && (
+                <Badge
+                  variant="info"
+                  className="text-uppercase d-flex align-items-center"
+                  style={{ gap: '0.25rem' }}
+                >
+                  <Icon src={CheckCircle} style={{ width: '14px', height: '14px' }} />
+                  IN PROGRESS
+                </Badge>
+              )}
+              {item.status === 'completed' && (
+                <Badge
+                  variant="success"
+                  className="text-uppercase d-flex align-items-center"
+                  style={{ gap: '0.25rem' }}
+                >
+                  <Icon src={CheckCircle} style={{ width: '14px', height: '14px' }} />
+                  COMPLETED
                 </Badge>
               )}
             </div>
@@ -302,36 +309,18 @@ const Explore = () => {
             </div>
           </div>
 
-          {/* Subject Filter */}
+          {/* Status Filter */}
           <div className="filter-section">
-            <h5 className="filter-section-title">Subject</h5>
-            <div className="checkbox-grid">
-              {subjects.map(subject => (
+            <h5 className="filter-section-title">Status</h5>
+            <div className="status-filter-checkboxes">
+              {statusOptions.map(status => (
                 <Form.Check
-                  key={subject}
+                  key={status.value}
                   type="checkbox"
-                  id={`subject-${subject}`}
-                  label={subject}
-                  checked={selectedSubjects.includes(subject)}
-                  onChange={(e) => handleSubjectChange(subject, e.target.checked)}
-                  className="filter-checkbox"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Duration Filter */}
-          <div className="filter-section">
-            <h5 className="filter-section-title">Duration</h5>
-            <div className="checkbox-grid">
-              {durations.map(duration => (
-                <Form.Check
-                  key={duration.label}
-                  type="checkbox"
-                  id={`duration-${duration.label}`}
-                  label={duration.label}
-                  checked={selectedDurations.some(d => d.label === duration.label)}
-                  onChange={(e) => handleDurationChange(duration, e.target.checked)}
+                  id={`status-${status.value}`}
+                  label={status.label}
+                  checked={selectedStatuses.includes(status.value)}
+                  onChange={(e) => handleStatusChange(status.value, e.target.checked)}
                   className="filter-checkbox"
                 />
               ))}
@@ -358,7 +347,7 @@ const Explore = () => {
               <div>
                 <h1 className="mb-1">Explore</h1>
                 <div className="text-muted">
-                  Showing {filteredItems.length} of {allItems.length}
+                  Showing {filteredItems.length} of {itemsWithStatus.length}
                 </div>
               </div>
             </div>
