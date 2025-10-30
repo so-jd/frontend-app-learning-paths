@@ -8,10 +8,13 @@ import { useCourseDiscoveryWithEnrollments, useLearningPaths } from './data/quer
 import { useScreenSize } from '../hooks/useScreenSize';
 import noResultsSVG from '../assets/no_results.svg';
 import { getConfig } from '@edx/frontend-platform';
+import { useNavigate } from 'react-router-dom';
+import CourseAbout from './CourseAbout';
 import './index.css';
 
 const Explore = () => {
   const { isSmall } = useScreenSize();
+  const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -19,6 +22,8 @@ const Explore = () => {
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [selectedDurations, setSelectedDurations] = useState([]);
   const [pageSize] = useState(100); // Load more courses
+  const [selectedCourseKey, setSelectedCourseKey] = useState(null);
+  const [isAboutPanelOpen, setIsAboutPanelOpen] = useState(false);
 
   // Debounce search query
   useEffect(() => {
@@ -112,6 +117,28 @@ const Explore = () => {
     return true;
   }), [allItems, selectedTab, searchQuery, selectedSubjects, selectedDurations]);
 
+  const handleCardClick = (item) => {
+    const isLearningPath = item.type === 'learning_path';
+    if (isLearningPath) {
+      // Navigate to learning path detail
+      navigate(`/learningpath/${item.key}`);
+    } else {
+      // Open course about panel - mount first, then trigger animation
+      setSelectedCourseKey(item.courseKey);
+      // Small delay to allow DOM to render before adding open class
+      setTimeout(() => {
+        setIsAboutPanelOpen(true);
+      }, 10);
+    }
+  };
+
+  const handleCloseCourseAbout = () => {
+    setIsAboutPanelOpen(false);
+    setTimeout(() => {
+      setSelectedCourseKey(null);
+    }, 350); // Wait for animation to finish
+  };
+
   const renderCard = (item) => {
     const isLearningPath = item.type === 'learning_path';
     let imageUrl = item.courseImageUrl;
@@ -124,7 +151,12 @@ const Explore = () => {
     }
 
     return (
-      <div key={item.id || item.key || item.courseKey} className="discover-card-wrapper">
+      <div
+        key={item.id || item.key || item.courseKey}
+        className="discover-card-wrapper"
+        onClick={() => handleCardClick(item)}
+        style={{ cursor: 'pointer' }}
+      >
         <Card className="h-100 discover-card">
           <Card.Section className="p-0">
             <div
@@ -226,7 +258,8 @@ const Explore = () => {
   }, [isSmall]);
 
   return (
-    <div className="explore-page-container">
+    <>
+      <div className="explore-page-container">
       {/* Collapsible Filter Sidebar */}
       <aside className={`filter-sidebar-container ${showFilters ? 'open' : 'closed'}`}>
         <div className="filter-sidebar-content">
@@ -368,6 +401,14 @@ const Explore = () => {
         </Container>
       </main>
     </div>
+
+      {/* Course About Side Panel */}
+      <CourseAbout
+        courseKey={selectedCourseKey}
+        isOpen={isAboutPanelOpen}
+        onClose={handleCloseCourseAbout}
+      />
+    </>
   );
 };
 
