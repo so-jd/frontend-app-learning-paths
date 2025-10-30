@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import {
-  Container, Card, Button, Badge, Icon, Spinner, IconButton,
+  Container, Card, Button, Badge, Icon, Spinner, IconButton, Alert,
 } from '@openedx/paragon';
-import { Close, School, CalendarMonth, Speed } from '@openedx/paragon/icons';
-import { useCourseDetail } from './data/queries';
+import { Close, School, CalendarMonth, Speed, CheckCircle } from '@openedx/paragon/icons';
+import { useCourseDetail, useCourseEnrollmentStatus, useEnrollInSelfPacedCourse } from './data/queries';
 import { getConfig } from '@edx/frontend-platform';
 import './CourseAbout.css';
 
 const CourseAbout = ({ courseKey, isOpen, onClose }) => {
   const { data: course, isLoading } = useCourseDetail(courseKey);
-  const [isEnrolling, setIsEnrolling] = useState(false);
+  const { data: enrollmentStatus, isLoading: isLoadingEnrollment } = useCourseEnrollmentStatus(courseKey);
+  const enrollMutation = useEnrollInSelfPacedCourse();
+  const [enrollmentMessage, setEnrollmentMessage] = useState(null);
 
   // Prevent body scroll when panel is open
   useEffect(() => {
@@ -35,14 +37,33 @@ const CourseAbout = ({ courseKey, isOpen, onClose }) => {
   };
 
   const handleEnroll = async () => {
-    setIsEnrolling(true);
-    // TODO: Implement enrollment logic
-    // await enrollInCourse(courseKey);
-    setTimeout(() => {
-      setIsEnrolling(false);
-      // Show success message or redirect
-    }, 1000);
+    if (enrollmentStatus?.isEnrolled) {
+      return; // Already enrolled
+    }
+
+    // Clear any previous error messages
+    setEnrollmentMessage(null);
+
+    try {
+      const result = await enrollMutation.mutateAsync(courseKey);
+
+      if (!result.success) {
+        setEnrollmentMessage({
+          type: 'danger',
+          text: 'Enrollment failed. Please try again.',
+        });
+      }
+      // Success case: no banner, enrollment status will update automatically
+    } catch (error) {
+      setEnrollmentMessage({
+        type: 'danger',
+        text: 'An error occurred during enrollment. Please try again.',
+      });
+    }
   };
+
+  const isEnrolled = enrollmentStatus?.isEnrolled;
+  const isEnrolling = enrollMutation.isPending;
 
   const courseImageUrl = course?.courseImageAssetPath?.startsWith('http')
     ? course.courseImageAssetPath
@@ -115,41 +136,76 @@ const CourseAbout = ({ courseKey, isOpen, onClose }) => {
                 </p>
 
                 {/* Course Meta Info */}
-                <div className="course-meta d-flex gap-4 mb-4">
+                <div className="course-meta d-flex mb-4">
                   <div className="meta-item">
-                    <Icon src={School} className="me-2" />
+                    <Icon src={School} />
                     <div>
-                      <small className="d-block text-muted">Certificate</small>
-                      <strong>Earn a verified certificate</strong>
+                      <small>Certificate</small>
+                      <strong>Verified</strong>
                     </div>
                   </div>
 
                   <div className="meta-item">
-                    <Icon src={CalendarMonth} className="me-2" />
+                    <Icon src={CalendarMonth} />
                     <div>
-                      <small className="d-block text-muted">Duration</small>
-                      <strong>{course.duration || 'Self-paced'}</strong>
+                      <small>Duration</small>
+                      <strong>{course.duration || 'Flexible'}</strong>
                     </div>
                   </div>
 
                   <div className="meta-item">
-                    <Icon src={Speed} className="me-2" />
+                    <Icon src={Speed} />
                     <div>
-                      <small className="d-block text-muted">Pace</small>
+                      <small>Pace</small>
                       <strong>{course.selfPaced ? 'Self-paced' : 'Instructor-led'}</strong>
                     </div>
                   </div>
                 </div>
 
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={handleEnroll}
-                  disabled={isEnrolling}
-                  className="enroll-button"
-                >
-                  {isEnrolling ? 'Enrolling...' : 'Enroll now'}
-                </Button>
+                {enrollmentMessage && (
+                  <Alert variant={enrollmentMessage.type} dismissible onClose={() => setEnrollmentMessage(null)} className="mb-3">
+                    {enrollmentMessage.text}
+                  </Alert>
+                )}
+
+                {isEnrolled ? (
+                  <div className="enrolled-status-container">
+                    <div className="enrolled-badge mb-3">
+                      <Icon src={CheckCircle} className="me-2" style={{ width: '18px', height: '18px' }} />
+                      <span>You're enrolled in this course</span>
+                    </div>
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        window.location.href = `${getConfig().LMS_BASE_URL}/courses/${courseKey}/course/`;
+                      }}
+                      className="enroll-button"
+                    >
+                      View Course
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="primary"
+                    onClick={handleEnroll}
+                    disabled={isEnrolling || isLoadingEnrollment}
+                    className="enroll-button"
+                  >
+                    {isEnrolling ? (
+                      <>
+                        <Spinner
+                          animation="border"
+                          size="sm"
+                          className="me-2"
+                          style={{ width: '1rem', height: '1rem', borderWidth: '2px' }}
+                        />
+                        Enrolling...
+                      </>
+                    ) : (
+                      'Enroll now'
+                    )}
+                  </Button>
+                )}
               </div>
 
               <div className="col-md-5">

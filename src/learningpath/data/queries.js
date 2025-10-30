@@ -386,6 +386,20 @@ export const useEnrollCourse = (learningPathId) => {
   });
 };
 
+export const useEnrollInSelfPacedCourse = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (courseId) => api.enrollInSelfPacedCourse(courseId),
+    onSuccess: (_, courseId) => {
+      // Invalidate enrollment status and dashboard data
+      queryClient.invalidateQueries(QUERY_KEYS.COURSE_ENROLLMENT_STATUS(courseId));
+      queryClient.invalidateQueries(QUERY_KEYS.LEARNER_DASHBOARD);
+      queryClient.invalidateQueries(QUERY_KEYS.COURSE_DISCOVERY());
+    },
+  });
+};
+
 export const useOrganizations = () => useQuery({
   queryKey: QUERY_KEYS.ORGANIZATIONS,
   queryFn: async () => {

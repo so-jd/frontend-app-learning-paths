@@ -184,6 +184,36 @@ export async function fetchOrganizations() {
   })));
 }
 
+export async function enrollInSelfPacedCourse(courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const formData = new URLSearchParams();
+    formData.append('course_id', courseId);
+    formData.append('enrollment_action', 'enroll');
+
+    const response = await client.post(
+      `${getConfig().LMS_BASE_URL}/change_enrollment`,
+      formData.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      },
+    );
+
+    return {
+      success: true,
+      data: camelCaseObject(response.data),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
+  }
+}
+
 export async function fetchCourseDiscovery({ searchString = '', pageSize = 20, pageIndex = 0 } = {}) {
   const client = getAuthenticatedHttpClient();
 
