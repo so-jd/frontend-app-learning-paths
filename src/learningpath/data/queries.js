@@ -18,8 +18,12 @@ export const QUERY_KEYS = {
   COURSE_COMPLETIONS: ['courseCompletions'],
   COURSE_COMPLETION: (courseId) => ['courseCompletion', courseId],
   COURSE_ENROLLMENT_STATUS: (courseId) => ['courseEnrollmentStatus', courseId],
+  COURSE_PREREQUISITES: (courseId) => ['coursePrerequisites', courseId],
   ORGANIZATIONS: ['organizations'],
   COURSE_DISCOVERY: (params) => ['courseDiscovery', params],
+  TAXONOMIES: ['taxonomies'],
+  COURSE_CONTENT_TAGS: (courseKey) => ['courseContentTags', courseKey],
+  TAXONOMY_TAGS: (taxonomyId) => ['taxonomyTags', taxonomyId],
 };
 
 // Stale time configurations
@@ -469,3 +473,36 @@ export const useCourseDiscoveryWithEnrollments = ({ searchString = '', pageSize 
     error: discoveryError,
   };
 };
+
+export const useTaxonomies = () => useQuery({
+  queryKey: QUERY_KEYS.TAXONOMIES,
+  queryFn: api.fetchTaxonomies,
+  staleTime: STALE_TIMES.ORGANIZATIONS, // 1 hour
+});
+
+export const useCourseContentTags = (courseKey) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_CONTENT_TAGS(courseKey),
+  queryFn: () => api.fetchCourseContentTags(courseKey),
+  enabled: !!courseKey,
+  staleTime: STALE_TIMES.COURSE_DETAIL,
+});
+
+export const useTaxonomyTags = (taxonomyId) => useQuery({
+  queryKey: QUERY_KEYS.TAXONOMY_TAGS(taxonomyId),
+  queryFn: () => api.fetchTaxonomyTags(taxonomyId),
+  enabled: !!taxonomyId,
+  staleTime: STALE_TIMES.ORGANIZATIONS,
+});
+
+export const useAllObjectTags = () => useQuery({
+  queryKey: ['allObjectTags'],
+  queryFn: api.fetchAllObjectTags,
+  staleTime: STALE_TIMES.COURSE_DETAIL, // 5 minutes
+});
+
+export const useCoursePrerequisites = (courseKey) => useQuery({
+  queryKey: QUERY_KEYS.COURSE_PREREQUISITES(courseKey),
+  queryFn: () => api.fetchCoursePrerequisites(courseKey),
+  enabled: !!courseKey,
+  staleTime: STALE_TIMES.COURSE_DETAIL, // 5 minutes
+});

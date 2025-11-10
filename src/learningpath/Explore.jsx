@@ -4,7 +4,7 @@ import {
   Form, Image, Spinner, Icon, Badge,
 } from '@openedx/paragon';
 import { Close, FilterList, CheckCircle } from '@openedx/paragon/icons';
-import { useCourseDiscoveryWithEnrollments, useLearningPaths } from './data/queries';
+import { useCourseDiscoveryWithEnrollments, useLearningPaths, useTaxonomies, useAllObjectTags } from './data/queries';
 import { useScreenSize } from '../hooks/useScreenSize';
 import noResultsSVG from '../assets/no_results.svg';
 import { getConfig } from '@edx/frontend-platform';
@@ -20,6 +20,7 @@ const Explore = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
   const [selectedStatuses, setSelectedStatuses] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [pageSize] = useState(100); // Load more courses
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [isAboutPanelOpen, setIsAboutPanelOpen] = useState(false);
@@ -42,28 +43,60 @@ const Explore = () => {
     isLoading: isLoadingPaths,
   } = useLearningPaths();
 
+  const { data: taxonomiesData } = useTaxonomies();
+  const { data: allObjectTags } = useAllObjectTags();
+
   const discoveryCourses = useMemo(() => discoveryData?.courses || [], [discoveryData]);
   const isLoading = isLoadingDiscovery || isLoadingPaths;
 
-  // Add status to items based on enrollment and completion
+  // Add status to items based on enrollment and completion, and merge tags
   const itemsWithStatus = useMemo(() => {
     const items = [...discoveryCourses, ...(learningPaths || [])];
     return items.map(item => {
-      if (!item.enrollmentDate) {
-        return { ...item, status: 'not-enrolled' };
+      // Determine status
+      let status = 'not-enrolled';
+      if (item.enrollmentDate) {
+        const percent = item.percent || 0;
+        if (percent >= 100) {
+          status = 'completed';
+        } else if (percent > 0) {
+          status = 'in-progress';
+        } else {
+          status = 'enrolled';
+        }
       }
 
-      // Check completion status
-      const percent = item.percent || 0;
-      if (percent >= 100) {
-        return { ...item, status: 'completed' };
-      } else if (percent > 0) {
-        return { ...item, status: 'in-progress' };
-      } else {
-        return { ...item, status: 'enrolled' };
+      // Merge tags from allObjectTags
+      const courseKey = item.courseKey || item.id || item.key;
+      const tagData = allObjectTags && allObjectTags[courseKey];
+      const tags = tagData?.tags || [];
+
+      return { ...item, status, tags };
+    });
+  }, [discoveryCourses, learningPaths, allObjectTags]);
+
+  // Collect unique tags from all displayed items
+  const displayedTags = useMemo(() => {
+    const tagsSet = new Map();
+
+    itemsWithStatus.forEach(item => {
+      if (item.tags && item.tags.length > 0) {
+        item.tags.forEach(tag => {
+          const key = `${tag.taxonomyId}-${tag.value}`;
+          if (!tagsSet.has(key)) {
+            tagsSet.set(key, {
+              id: key,
+              value: tag.value,
+              taxonomyId: tag.taxonomyId,
+              taxonomyName: tag.taxonomyName || `Taxonomy ${tag.taxonomyId}`,
+            });
+          }
+        });
       }
     });
-  }, [discoveryCourses, learningPaths]);
+
+    return Array.from(tagsSet.values());
+  }, [itemsWithStatus]);
 
   // Status options
   const statusOptions = [
@@ -82,11 +115,31 @@ const Explore = () => {
     });
   };
 
-  // Filter items based on tab, search, and status
+  const handleTagChange = (tagId, isChecked) => {
+    setSelectedTags(prev => {
+      if (isChecked) {
+        return [...prev, tagId];
+      }
+      return prev.filter(t => t !== tagId);
+    });
+  };
+
+  // Filter items based on tab, search, status, and tags
   const filteredItems = useMemo(() => itemsWithStatus.filter(item => {
     // Tab filter
     if (selectedTab === 'courses' && item.type !== 'course') { return false; }
     if (selectedTab === 'learning_paths' && item.type !== 'learning_path') { return false; }
+
+    // Tag filter - if any tags are selected, only show items with matching tags
+    // Tags from content_tagging have format: {value: "Computer Science", taxonomyId: 1}
+    if (selectedTags.length > 0) {
+      const itemTags = item.tags || [];
+      const itemTagIds = itemTags.map(t => `${t.taxonomyId}-${t.value}`);
+      const hasMatchingTag = selectedTags.some(tagId => itemTagIds.includes(tagId));
+      if (!hasMatchingTag) {
+        return false;
+      }
+    }
 
     // Status filter - if any statuses are selected, only show items matching those statuses
     if (selectedStatuses.length > 0 && !selectedStatuses.includes(item.status)) {
@@ -96,13 +149,15 @@ const Explore = () => {
     // Search is handled by the API for discovery courses
     // Only apply local search filter for learning paths when there's no API search
     if (!item.isDiscovery && searchQuery !== '') {
+      const tagValues = (item.tags || []).map(t => t.value).join(' ');
       const searchMatch = (item.displayName && item.displayName.toLowerCase().includes(searchQuery.toLowerCase()))
-          || (item.name && item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+          || (item.name && item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+          || tagValues.toLowerCase().includes(searchQuery.toLowerCase());
       if (!searchMatch) { return false; }
     }
 
     return true;
-  }), [itemsWithStatus, selectedTab, selectedStatuses, searchQuery]);
+  }), [itemsWithStatus, selectedTab, selectedTags, selectedStatuses, searchQuery]);
 
   const handleCardClick = (item) => {
     const isLearningPath = item.type === 'learning_path';
@@ -324,6 +379,30 @@ const Explore = () => {
                   className="filter-checkbox"
                 />
               ))}
+            </div>
+          </div>
+
+          {/* Tag Filter */}
+          <div className="filter-section">
+            <h5 className="filter-section-title">Tags</h5>
+            <div className="status-filter-checkboxes">
+              {displayedTags.length > 0 ? (
+                displayedTags.map(tag => (
+                  <Form.Check
+                    key={tag.id}
+                    type="checkbox"
+                    id={`tag-${tag.id}`}
+                    label={`${tag.value} (${tag.taxonomyName})`}
+                    checked={selectedTags.includes(tag.id)}
+                    onChange={(e) => handleTagChange(tag.id, e.target.checked)}
+                    className="filter-checkbox"
+                  />
+                ))
+              ) : (
+                <p className="text-muted small">
+                  No tags found. Tag courses in Studio to enable filtering.
+                </p>
+              )}
             </div>
           </div>
         </div>

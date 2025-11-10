@@ -1,17 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  Container, Card, Button, Badge, Icon, Spinner, IconButton, Alert,
+  Container, Card, Button, Badge, Icon, Spinner, IconButton, Alert, Skeleton,
 } from '@openedx/paragon';
 import { Close, School, CalendarMonth, Speed, CheckCircle } from '@openedx/paragon/icons';
-import { useCourseDetail, useCourseEnrollmentStatus, useEnrollInSelfPacedCourse } from './data/queries';
+import {
+  useCourseDetail,
+  useCourseEnrollmentStatus,
+  useEnrollInSelfPacedCourse,
+  useAllObjectTags,
+  useCoursePrerequisites,
+} from './data/queries';
 import { getConfig } from '@edx/frontend-platform';
 import './CourseAbout.css';
 
 const CourseAbout = ({ courseKey, isOpen, onClose }) => {
   const { data: course, isLoading } = useCourseDetail(courseKey);
   const { data: enrollmentStatus, isLoading: isLoadingEnrollment } = useCourseEnrollmentStatus(courseKey);
+  const { data: allObjectTags } = useAllObjectTags();
+  const { data: prerequisites, isLoading: isLoadingPrerequisites } = useCoursePrerequisites(courseKey);
   const enrollMutation = useEnrollInSelfPacedCourse();
   const [enrollmentMessage, setEnrollmentMessage] = useState(null);
+
+  // Extract tags for this specific course from allObjectTags
+  const courseTags = useMemo(() => {
+    if (!courseKey || !allObjectTags || !allObjectTags[courseKey]) {
+      return { results: [], taxonomies: {} };
+    }
+
+    const tagData = allObjectTags[courseKey];
+    const tags = tagData.tags || [];
+    const taxonomies = tagData.taxonomies || {};
+
+    return {
+      results: tags,
+      taxonomies,
+    };
+  }, [courseKey, allObjectTags]);
 
   // Prevent body scroll when panel is open
   useEffect(() => {
@@ -105,11 +129,7 @@ const CourseAbout = ({ courseKey, isOpen, onClose }) => {
           <div className="course-about-page">
             <Container className="py-4">
               {/* Header with back button */}
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <small className="text-muted">Course Details</small>
-                  <h4 className="mb-0">{course.org}</h4>
-                </div>
+              <div className="d-flex justify-content-end align-items-center mb-3">
                 <IconButton
                   src={Close}
                   iconAs={Icon}
@@ -233,45 +253,152 @@ const CourseAbout = ({ courseKey, isOpen, onClose }) => {
           />
         </section>
 
-        {/* What You'll Learn Section */}
-        <section className="content-section mb-4">
-          <h3 className="section-title">What you'll learn</h3>
-          <div className="section-content">
-            <ul className="learning-objectives">
-              <li>Gain comprehensive knowledge in {course.name}</li>
-              <li>Master key concepts and practical applications</li>
-              <li>Develop skills through hands-on exercises</li>
-              <li>Earn a certificate upon successful completion</li>
-            </ul>
-          </div>
-        </section>
+        {/* Tags Section */}
+        {courseTags?.results && courseTags.results.length > 0 && (
+          <section className="content-section mb-4">
+            <h3 className="section-title">Topics</h3>
+            <div className="section-content">
+              <div className="tags-container">
+                {courseTags.results.map((tag, index) => {
+                  const taxonomyName = courseTags.taxonomies?.[tag.taxonomyId]?.name || 'Tag';
+                  return (
+                    <Badge
+                      key={`${tag.taxonomyId}-${tag.value}-${index}`}
+                      variant="secondary"
+                      className="course-tag-badge"
+                      title={taxonomyName}
+                    >
+                      {tag.value}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
-        {/* Qualification Section */}
-        <section className="content-section mb-4">
-          <h3 className="section-title">Qualification</h3>
-          <div className="section-content">
-            <p>
-              This course is designed for learners at all levels. No prior experience is required,
-              though basic familiarity with the subject matter may be helpful.
-            </p>
-          </div>
-        </section>
+        {/* Qualification Section - Only show if prerequisites exist */}
+        {(isLoadingPrerequisites || prerequisites?.hasPrerequisites || course.prerequisitesHtml) && (
+          <section className="content-section mb-4">
+            <h3 className="section-title">Prerequisites & Requirements</h3>
+            <div className="section-content">
+              {isLoadingPrerequisites ? (
+                // Loading shimmer state
+                <div className="prerequisites-loading">
+                  <div className="prerequisites-summary">
+                    <Skeleton height={60} width={60} className="skeleton-circle" />
+                    <div style={{ flex: 1 }}>
+                      <Skeleton height={24} width="40%" className="mb-2" />
+                      <Skeleton height={16} width="80%" />
+                    </div>
+                  </div>
+                  <div className="prerequisites-list-loading mt-4">
+                    <Skeleton height={20} width="30%" className="mb-3" />
+                    <Skeleton height={70} className="mb-2" />
+                    <Skeleton height={70} className="mb-2" />
+                    <Skeleton height={70} />
+                  </div>
+                </div>
+              ) : prerequisites?.hasPrerequisites ? (
+                <div className="prerequisites-container">
+                  {/* Progress Summary */}
+                  <div className="prerequisites-summary">
+                    <div className="summary-icon">
+                      <Icon
+                        src={prerequisites.allPrerequisitesMet ? CheckCircle : School}
+                        className="summary-icon-img"
+                      />
+                    </div>
+                    <div className="summary-text">
+                      <h4 className="summary-title">
+                        {prerequisites.allPrerequisitesMet
+                          ? 'All Prerequisites Met'
+                          : 'Prerequisites Required'}
+                      </h4>
+                      <p className="summary-description">
+                        {prerequisites.allPrerequisitesMet
+                          ? 'You have completed all required prerequisite courses and can enroll.'
+                          : `Complete ${prerequisites.unfulfilledPrerequisites.length} of ${prerequisites.prerequisites.length} required courses to enroll.`}
+                      </p>
+                    </div>
+                    {!prerequisites.allPrerequisitesMet && (
+                      <div className="summary-progress">
+                        <div
+                          className="progress-circle"
+                          style={{
+                            '--progress': `${
+                              ((prerequisites.prerequisites.length - prerequisites.unfulfilledPrerequisites.length)
+                                / prerequisites.prerequisites.length) * 100
+                            }`,
+                          }}
+                        >
+                          <span className="progress-text">
+                            {prerequisites.prerequisites.length - prerequisites.unfulfilledPrerequisites.length}
+                            /
+                            {prerequisites.prerequisites.length}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-        {/* Instructors Section */}
-        <section className="content-section mb-4">
-          <h3 className="section-title">Instructors</h3>
-          <div className="instructors-grid">
-            <Card className="instructor-card">
-              <Card.Body className="text-center p-4">
-                <div className="instructor-avatar mx-auto mb-3" />
-                <h5 className="instructor-name mb-1">Instructor Name</h5>
-                <p className="instructor-title text-muted mb-0">
-                  Professor at {course.org}
-                </p>
-              </Card.Body>
-            </Card>
-          </div>
-              </section>
+                  {/* Prerequisites List */}
+                  <div className="prerequisites-list-container">
+                    <h5 className="prerequisites-list-title">Required Courses</h5>
+                    <ul className="prerequisites-list">
+                      {prerequisites.prerequisites.map((prereq) => {
+                        const isFulfilled = !prerequisites.unfulfilledPrerequisites.some(
+                          (unfulfilled) => unfulfilled.courseId === prereq.courseId,
+                        );
+                        return (
+                          <li
+                            key={prereq.courseId}
+                            className={`prerequisite-item ${isFulfilled ? 'fulfilled' : 'unfulfilled'}`}
+                          >
+                            <div className="prerequisite-status">
+                              <Icon
+                                src={CheckCircle}
+                                className={`status-icon ${isFulfilled ? 'status-fulfilled' : 'status-unfulfilled'}`}
+                              />
+                            </div>
+                            <div className="prerequisite-content">
+                              <span className="prerequisite-name">{prereq.displayName}</span>
+                              <span className={`prerequisite-badge ${isFulfilled ? 'badge-fulfilled' : 'badge-unfulfilled'}`}>
+                                {isFulfilled ? 'Completed' : 'Required'}
+                              </span>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              ) : course.prerequisitesHtml ? (
+                <div
+                  dangerouslySetInnerHTML={{ __html: course.prerequisitesHtml }}
+                />
+              ) : null}
+            </div>
+          </section>
+        )}
+
+        {/* Instructors Section - Only show for instructor-led courses */}
+        {!course.selfPaced && (
+          <section className="content-section mb-4">
+            <h3 className="section-title">Instructors</h3>
+            <div className="instructors-grid">
+              <Card className="instructor-card">
+                <Card.Body className="text-center p-4">
+                  <div className="instructor-avatar mx-auto mb-3" />
+                  <h5 className="instructor-name mb-1">Instructor Name</h5>
+                  <p className="instructor-title text-muted mb-0">
+                    Professor at {course.org}
+                  </p>
+                </Card.Body>
+              </Card>
+            </div>
+          </section>
+        )}
             </Container>
           </div>
         )}

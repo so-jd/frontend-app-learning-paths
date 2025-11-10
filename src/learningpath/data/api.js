@@ -53,6 +53,17 @@ export async function fetchCourseDetails(courseId) {
   );
   const { data } = response;
 
+  // Extract prerequisites section from HTML overview
+  let prerequisitesHtml = null;
+  if (data.overview) {
+    const prereqMatch = data.overview.match(
+      /<section class="prerequisites">([\s\S]*?)<\/section>/i,
+    );
+    if (prereqMatch) {
+      [, prerequisitesHtml] = prereqMatch;
+    }
+  }
+
   return camelCaseObject({
     id: data.course_id,
     number: data.number,
@@ -66,6 +77,7 @@ export async function fetchCourseDetails(courseId) {
     description: data.overview,
     selfPaced: data.pacing === 'self',
     duration: data.effort,
+    prerequisitesHtml,
   });
 }
 
@@ -184,6 +196,104 @@ export async function fetchOrganizations() {
   })));
 }
 
+// Fetch all available taxonomies from OpenEdX content_tagging (CMS API)
+export async function fetchTaxonomies() {
+  const client = getAuthenticatedHttpClient();
+  const cmsBaseUrl = getConfig().STUDIO_BASE_URL || getConfig().CMS_BASE_URL || getConfig().LMS_BASE_URL.replace('lms', 'studio');
+  const response = await client.get(
+    `${cmsBaseUrl}/api/content_tagging/v1/taxonomies/`,
+  );
+  // eslint-disable-next-line no-console
+  console.log('=== Taxonomies API Response ===', response.data);
+  return camelCaseObject(response.data);
+}
+
+// Fetch all object tags (for all courses) from our custom learning-paths endpoint
+export async function fetchAllObjectTags() {
+  const client = getAuthenticatedHttpClient();
+
+  try {
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/all_object_tags/`,
+    );
+
+    // eslint-disable-next-line no-console
+    console.log('=== All Object Tags ===', response.data);
+
+    // Response format: {object_id: {tags: [...], taxonomies: {...}}}
+    // We need to preserve the top-level keys (course IDs) but camelCase the nested values
+    const result = {};
+    Object.entries(response.data).forEach(([courseId, data]) => {
+      result[courseId] = camelCaseObject(data);
+    });
+
+    return result;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching all object tags:', error);
+    return {};
+  }
+}
+
+// Fetch tags for a specific course from OpenEdX content_tagging (CMS API)
+// The API returns: {object_id: {taxonomies: [{taxonomy_id, can_tag_object,
+// tags: [{value, lineage, can_delete_objecttag}]}]}}
+export async function fetchCourseContentTags(courseKey) {
+  const client = getAuthenticatedHttpClient();
+  const cmsBaseUrl = getConfig().STUDIO_BASE_URL || getConfig().CMS_BASE_URL || getConfig().LMS_BASE_URL.replace('lms', 'studio');
+
+  // Note: object_id is a path parameter, not a query parameter
+  const response = await client.get(
+    `${cmsBaseUrl}/api/content_tagging/v1/object_tags/${encodeURIComponent(courseKey)}/`,
+  );
+
+  // eslint-disable-next-line no-console
+  console.log(`=== Course Content Tags for ${courseKey} ===`, response.data);
+
+  // Transform the response structure
+  // Response format: {course_key: {taxonomies: [{taxonomy_id, tags: [{value, lineage}]}]}}
+  const data = response.data[courseKey];
+  if (!data || !data.taxonomies) {
+    return { results: [], taxonomies: {} };
+  }
+
+  // Flatten the nested structure to match our expected format
+  const results = [];
+  const taxonomies = {};
+
+  data.taxonomies.forEach(taxonomy => {
+    // Store taxonomy info
+    taxonomies[taxonomy.taxonomy_id] = {
+      id: taxonomy.taxonomy_id,
+      name: taxonomy.name || `Taxonomy ${taxonomy.taxonomy_id}`,
+    };
+
+    // Flatten tags
+    if (taxonomy.tags) {
+      taxonomy.tags.forEach(tag => {
+        results.push({
+          value: tag.value,
+          lineage: tag.lineage,
+          taxonomyId: taxonomy.taxonomy_id,
+          canDelete: tag.can_delete_objecttag,
+        });
+      });
+    }
+  });
+
+  return camelCaseObject({ results, taxonomies });
+}
+
+// Fetch tags within a specific taxonomy (CMS API)
+export async function fetchTaxonomyTags(taxonomyId) {
+  const client = getAuthenticatedHttpClient();
+  const cmsBaseUrl = getConfig().STUDIO_BASE_URL || getConfig().CMS_BASE_URL || getConfig().LMS_BASE_URL.replace('lms', 'studio');
+  const response = await client.get(
+    `${cmsBaseUrl}/api/content_tagging/v1/taxonomies/${taxonomyId}/tags/`,
+  );
+  return camelCaseObject(response.data);
+}
+
 export async function enrollInSelfPacedCourse(courseId) {
   const client = getAuthenticatedHttpClient();
   try {
@@ -211,6 +321,24 @@ export async function enrollInSelfPacedCourse(courseId) {
       success: false,
       error: error.response?.data || error.message,
     };
+  }
+}
+
+export async function fetchCoursePrerequisites(courseId) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/courses/${encodeURIComponent(courseId)}/prerequisites/`,
+    );
+    return camelCaseObject(response.data);
+  } catch (error) {
+    // If endpoint doesn't exist (404) or milestones not available, return null
+    if (error.response?.status === 404) {
+      return null;
+    }
+    // eslint-disable-next-line no-console
+    console.error('Error fetching course prerequisites:', error);
+    return null;
   }
 }
 
