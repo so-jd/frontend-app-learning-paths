@@ -13,10 +13,10 @@ import {
 } from '@openedx/paragon/icons';
 import {
   useLearningPathDetail, useCoursesByIds, useEnrollLearningPath, useOrganizations,
-} from './data/queries';
+} from '../data/queries';
 import CourseDetailPage from './CourseDetails';
-import { CoursesWithProgressList } from './progress';
-import { useScreenSize } from '../hooks/useScreenSize';
+import { CoursesWithProgressList } from '../components/progress';
+import { useScreenSize } from '../../hooks/useScreenSize';
 
 const LearningPathDetailPage = () => {
   const { isSmall } = useScreenSize();

@@ -13,12 +13,12 @@ import {
   Info,
 } from '@openedx/paragon/icons';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
-import { buildAssetUrl } from '../util/assetUrl';
+import { buildAssetUrl } from '../../../../util/assetUrl';
 import {
   usePrefetchCourseDetail, useCourseEnrollmentStatus, useEnrollCourse, useOrganizations,
-} from './data/queries';
-import { buildCourseHomeUrl } from './utils';
-import { useScreenSize } from '../hooks/useScreenSize';
+} from '../../../data/queries';
+import { buildCourseHomeUrl } from '../../../utils';
+import { useScreenSize } from '../../../../hooks/useScreenSize';
 
 export const CourseCard = ({
   course, relatedLearningPaths, onClick, onClickViewButton, isEnrolledInLearningPath, showFilters = false,

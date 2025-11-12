@@ -1,6 +1,6 @@
 import React from 'react';
 import ProgressIndicator from './ProgressIndicator';
-import { CourseCardWithEnrollment } from '../CourseCard';
+import { CourseCardWithEnrollment } from '../cards/CourseCard';
 import { Course } from './types';
 
 interface CourseWithProgressProps {

@@ -14,8 +14,8 @@ import {
   FormatListBulleted,
   AccessTime,
 } from '@openedx/paragon/icons';
-import { useOrganizations, usePrefetchLearningPathDetail } from './data/queries';
-import { useScreenSize } from '../hooks/useScreenSize';
+import { useOrganizations, usePrefetchLearningPathDetail } from '../../../data/queries';
+import { useScreenSize } from '../../../../hooks/useScreenSize';
 
 const LearningPathCard = ({ learningPath, showFilters = false }) => {
   const {

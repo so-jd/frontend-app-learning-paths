@@ -7,12 +7,12 @@ import {
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
 import { FilterAlt, FilterList, Search } from '@openedx/paragon/icons';
-import { useLearningPaths, useLearnerDashboard, useOrganizations } from './data/queries';
-import LearningPathCard from './LearningPathCard';
-import { CourseCard } from './CourseCard';
-import FilterPanel from './FilterPanel';
-import { useScreenSize } from '../hooks/useScreenSize';
-import noResultsSVG from '../assets/no_results.svg';
+import { useLearningPaths, useLearnerDashboard, useOrganizations } from '../data/queries';
+import LearningPathCard from '../components/cards/LearningPathCard';
+import { CourseCard } from '../components/cards/CourseCard';
+import FilterPanel from '../components/panels/FilterPanel';
+import { useScreenSize } from '../../hooks/useScreenSize';
+import noResultsSVG from '../../assets/no_results.svg';
 
 const Dashboard = () => {
   const { isSmall } = useScreenSize();

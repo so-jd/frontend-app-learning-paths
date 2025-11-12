@@ -21,10 +21,10 @@ import {
   Close,
   ChevronLeft,
 } from '@openedx/paragon/icons';
-import { useCourseDetail, useOrganizations } from './data/queries';
-import { buildAssetUrl, replaceStaticAssetReferences } from '../util/assetUrl';
-import { buildCourseHomeUrl } from './utils';
-import { useScreenSize } from '../hooks/useScreenSize';
+import { useCourseDetail, useOrganizations } from '../data/queries';
+import { buildAssetUrl, replaceStaticAssetReferences } from '../../util/assetUrl';
+import { buildCourseHomeUrl } from '../utils';
+import { useScreenSize } from '../../hooks/useScreenSize';
 
 const CourseDetailContent = ({
   course,

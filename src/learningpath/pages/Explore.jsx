@@ -4,14 +4,14 @@ import {
   Form, Image, Spinner, Icon, Badge,
 } from '@openedx/paragon';
 import { Close, FilterList, CheckCircle } from '@openedx/paragon/icons';
-import { useCourseDiscoveryWithEnrollments, useLearningPaths, useTaxonomies, useAllObjectTags } from './data/queries';
-import { useScreenSize } from '../hooks/useScreenSize';
-import noResultsSVG from '../assets/no_results.svg';
+import { useCourseDiscoveryWithEnrollments, useLearningPaths, useTaxonomies, useAllObjectTags } from '../data/queries';
+import { useScreenSize } from '../../hooks/useScreenSize';
+import noResultsSVG from '../../assets/no_results.svg';
 import { getConfig } from '@edx/frontend-platform';
 import { useNavigate } from 'react-router-dom';
-import CourseAbout from './CourseAbout';
-import LearningPathAbout from './LearningPathAbout';
-import './index.css';
+import CourseAbout from '../components/panels/CourseAbout';
+import LearningPathAbout from '../components/panels/LearningPathAbout';
+import '../index.css';
 
 const Explore = () => {
   const { isSmall } = useScreenSize();

@@ -9,7 +9,7 @@ import {
   useEnrollInSelfPacedCourse,
   useAllObjectTags,
   useCoursePrerequisites,
-} from './data/queries';
+} from '../../../data/queries';
 import { getConfig } from '@edx/frontend-platform';
 import './CourseAbout.css';
 

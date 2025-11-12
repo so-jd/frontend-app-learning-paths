@@ -7,9 +7,9 @@ import {
   useLearningPathDetail,
   useEnrollLearningPath,
   useCoursesByIds,
-} from './data/queries';
+} from '../../../data/queries';
 import { getConfig } from '@edx/frontend-platform';
-import CourseAbout from './CourseAbout';
+import CourseAbout from '../CourseAbout';
 import './LearningPathAbout.css';
 
 const LearningPathAbout = ({ learningPathKey, isOpen, onClose }) => {

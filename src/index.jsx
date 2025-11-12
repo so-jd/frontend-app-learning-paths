@@ -14,10 +14,10 @@ import { LearningHeader as Header } from '@edx/frontend-component-header';
 import FooterSlot from '@openedx/frontend-slot-footer';
 import messages from './i18n';
 import queryClient from './queryClient';
-import Dashboard from './learningpath/Dashboard';
-import LearningPathDetailPage from './learningpath/LearningPathDetails';
-import CourseDetailPage from './learningpath/CourseDetails';
-import Explore from './learningpath/Explore';
+import Dashboard from './learningpath/pages/Dashboard';
+import LearningPathDetailPage from './learningpath/pages/LearningPathDetails';
+import CourseDetailPage from './learningpath/pages/CourseDetails';
+import Explore from './learningpath/pages/Explore';
 
 import './index.scss';
 import './setupConsoleOverride';
