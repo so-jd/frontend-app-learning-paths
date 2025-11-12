@@ -10,6 +10,7 @@ import noResultsSVG from '../assets/no_results.svg';
 import { getConfig } from '@edx/frontend-platform';
 import { useNavigate } from 'react-router-dom';
 import CourseAbout from './CourseAbout';
+import LearningPathAbout from './LearningPathAbout';
 import './index.css';
 
 const Explore = () => {
@@ -24,6 +25,8 @@ const Explore = () => {
   const [pageSize] = useState(100); // Load more courses
   const [selectedCourseKey, setSelectedCourseKey] = useState(null);
   const [isAboutPanelOpen, setIsAboutPanelOpen] = useState(false);
+  const [selectedLearningPathKey, setSelectedLearningPathKey] = useState(null);
+  const [isLearningPathPanelOpen, setIsLearningPathPanelOpen] = useState(false);
 
   // Debounce search query
   useEffect(() => {
@@ -162,8 +165,12 @@ const Explore = () => {
   const handleCardClick = (item) => {
     const isLearningPath = item.type === 'learning_path';
     if (isLearningPath) {
-      // Navigate to learning path detail
-      navigate(`/learningpath/${item.key}`);
+      // Open learning path about panel - mount first, then trigger animation
+      setSelectedLearningPathKey(item.key);
+      // Small delay to allow DOM to render before adding open class
+      setTimeout(() => {
+        setIsLearningPathPanelOpen(true);
+      }, 10);
     } else {
       // Open course about panel - mount first, then trigger animation
       setSelectedCourseKey(item.courseKey);
@@ -178,6 +185,13 @@ const Explore = () => {
     setIsAboutPanelOpen(false);
     setTimeout(() => {
       setSelectedCourseKey(null);
+    }, 350); // Wait for animation to finish
+  };
+
+  const handleCloseLearningPathPanel = () => {
+    setIsLearningPathPanelOpen(false);
+    setTimeout(() => {
+      setSelectedLearningPathKey(null);
     }, 350); // Wait for animation to finish
   };
 
@@ -475,6 +489,13 @@ const Explore = () => {
         courseKey={selectedCourseKey}
         isOpen={isAboutPanelOpen}
         onClose={handleCloseCourseAbout}
+      />
+
+      {/* Learning Path About Side Panel */}
+      <LearningPathAbout
+        learningPathKey={selectedLearningPathKey}
+        isOpen={isLearningPathPanelOpen}
+        onClose={handleCloseLearningPathPanel}
       />
     </>
   );

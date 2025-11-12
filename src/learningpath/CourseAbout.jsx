@@ -196,9 +196,8 @@ const CourseAbout = ({ courseKey, isOpen, onClose }) => {
                     </div>
                     <Button
                       variant="primary"
-                      onClick={() => {
-                        window.location.href = `${getConfig().LMS_BASE_URL}/courses/${courseKey}/course/`;
-                      }}
+                      as="a"
+                      href={`${getConfig().LMS_BASE_URL}/courses/${courseKey}/course/`}
                       className="enroll-button"
                     >
                       View Course
