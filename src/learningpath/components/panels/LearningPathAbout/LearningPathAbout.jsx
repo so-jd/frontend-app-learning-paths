@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Container, Card, Button, Badge, Icon, Spinner, IconButton, Alert, ModalLayer,
+  Container, Card, Button, Badge, Icon, Spinner, IconButton, Alert,
 } from '@openedx/paragon';
 import { Close, FormatListBulleted, CalendarMonth, Award, CheckCircle, School } from '@openedx/paragon/icons';
 import {
@@ -202,7 +202,7 @@ const LearningPathAbout = ({ learningPathKey, isOpen, onClose }) => {
                           <Button
                             variant="primary"
                             as="a"
-                            href={`${getConfig().MFE_BASE_URL}/learningpath/${learningPathKey}`}
+                            href={`/learningpath/${learningPathKey}`}
                             className="enroll-button"
                           >
                             View Learning Path
@@ -284,7 +284,7 @@ const LearningPathAbout = ({ learningPathKey, isOpen, onClose }) => {
                               <span>{index + 1}</span>
                             </div>
                             <div className="course-info">
-                              <h5 className="course-name">{courseData?.name || step.courseKey}</h5>
+                              <h5 className="course-name">{courseData?.displayName || courseData?.name || step.courseKey}</h5>
                               {courseData?.org && (
                                 <p className="course-org text-muted mb-0">{courseData.org}</p>
                               )}
@@ -322,14 +322,12 @@ const LearningPathAbout = ({ learningPathKey, isOpen, onClose }) => {
       </div>
 
       {/* Course Detail Modal */}
-      {isCourseModalOpen && (
-        <ModalLayer isOpen={isCourseModalOpen} onClose={handleCloseCourseModal}>
-          <CourseAbout
-            courseKey={selectedCourseKey}
-            isOpen={isCourseModalOpen}
-            onClose={handleCloseCourseModal}
-          />
-        </ModalLayer>
+      {selectedCourseKey && (
+        <CourseAbout
+          courseKey={selectedCourseKey}
+          isOpen={isCourseModalOpen}
+          onClose={handleCloseCourseModal}
+        />
       )}
     </>
   );

@@ -1026,6 +1026,22 @@
       color: #495057 !important;
     }
 
+    /* Learning Path badge - simple styling */
+    &.learning-path-badge {
+      background-color: var(--crimson) !important;
+      color: white !important;
+    }
+
+    /* Subtle course badge */
+    &.course-badge {
+      background-color: #f8f9fa !important;
+      color: #6c757d !important;
+      font-weight: 500 !important;
+      padding: 0.4rem 0.7rem !important;
+      font-size: 0.75rem !important;
+      border: 1px solid #dee2e6 !important;
+    }
+
     /* Enrolled badge - green background with white text and icon */
     &.enrolled-badge {
       background-color: #52854C !important;
@@ -1043,14 +1059,17 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    /* Consistent card styling for both learning paths and courses */
+    &.learning-path-card,
+    &.course-card {
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 
-      .card-image-wrapper img {
-        transform: scale(1.05);
+      &:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
       }
     }
 

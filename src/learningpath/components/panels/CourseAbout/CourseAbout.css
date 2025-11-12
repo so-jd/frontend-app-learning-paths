@@ -4,20 +4,32 @@
   top: 0;
   right: 0;
   width: 80%;
+  max-width: 900px;
   height: 100vh;
-  background-color: #f8f9fa;
-  z-index: 1100;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  z-index: 1200;
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.25);
   transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
   /* Ensure scrolling stays within panel */
   overscroll-behavior: contain;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .course-about-panel.open {
   transform: translateX(0);
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 /* Prevent body scroll when panel is open */
@@ -34,12 +46,13 @@ body.panel-open {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1099;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);
+  z-index: 1199;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.35s ease-in-out, visibility 0.35s ease-in-out;
-  backdrop-filter: blur(2px);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   /* Prevent scroll on overlay */
   overflow: hidden;
   touch-action: none;
@@ -48,18 +61,34 @@ body.panel-open {
 .course-about-overlay.visible {
   opacity: 1;
   visibility: visible;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .course-about-page {
-  background-color: #f8f9fa;
+  background-color: transparent;
   min-height: 100vh;
 }
 
 .course-about-card {
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
   overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  background: white;
+}
+
+.course-about-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .course-title {
@@ -206,9 +235,9 @@ body.panel-open {
 /* Content Sections */
 .content-section {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .section-title {
@@ -287,15 +316,22 @@ body.panel-open {
 
 /* Close button styling */
 .panel-close-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .panel-close-button:hover {
-  background-color: #e9ecef !important;
-  transform: scale(1.05);
+  background-color: #f8f9fa !important;
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.panel-close-button:active {
+  transform: scale(0.95);
 }
 
 /* Tags */

@@ -197,7 +197,8 @@ const Explore = () => {
 
   const renderCard = (item) => {
     const isLearningPath = item.type === 'learning_path';
-    let imageUrl = item.courseImageUrl;
+    // For learning paths, use item.image; for courses, use item.courseImageUrl
+    let imageUrl = isLearningPath ? item.image : item.courseImageUrl;
     const courseName = item.displayName;
     const orgName = item.org;
 
@@ -213,7 +214,7 @@ const Explore = () => {
         onClick={() => handleCardClick(item)}
         style={{ cursor: 'pointer' }}
       >
-        <Card className="h-100 discover-card">
+        <Card className={`h-100 discover-card ${isLearningPath ? 'learning-path-card' : 'course-card'}`}>
           <Card.Section className="p-0">
             <div
               className="card-image-wrapper"
@@ -225,7 +226,7 @@ const Explore = () => {
                 overflow: 'hidden',
               }}
             >
-              {imageUrl ? (
+              {imageUrl && (
                 <img
                   src={imageUrl}
                   alt={courseName}
@@ -242,16 +243,25 @@ const Explore = () => {
                     e.target.style.display = 'none';
                   }}
                 />
-              ) : (
+              )}
+              {isLearningPath && (
                 <div
                   style={{
                     position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
+                    top: '12px',
+                    left: '12px',
+                    backgroundColor: 'var(--crimson)',
+                    color: 'white',
+                    padding: '0.4rem 0.75rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    borderRadius: '4px',
+                    zIndex: 2,
+                    letterSpacing: '0.5px',
                   }}
                 >
-                  <span style={{ fontSize: '3rem' }}>📚</span>
+                  Learning Path
                 </div>
               )}
             </div>
@@ -269,6 +279,12 @@ const Explore = () => {
               className="flex-grow-1"
             />
 
+            {isLearningPath && item.numCourses !== undefined && (
+              <div className="small text-muted mb-2" style={{ fontWeight: '500' }}>
+                {item.numCourses} {item.numCourses === 1 ? 'Course' : 'Courses'}
+              </div>
+            )}
+
             {item.shortDescription && (
               <p
                 className="small text-muted mb-3"
@@ -285,11 +301,6 @@ const Explore = () => {
             )}
 
             <div className="d-flex align-items-center mt-auto flex-wrap" style={{ gap: '0.5rem' }}>
-              {isLearningPath ? (
-                <Badge variant="primary" className="text-uppercase">LEARNING PATH</Badge>
-              ) : (
-                <Badge variant="light" className="text-uppercase">COURSE</Badge>
-              )}
               {item.status === 'enrolled' && (
                 <Badge
                   variant="success"

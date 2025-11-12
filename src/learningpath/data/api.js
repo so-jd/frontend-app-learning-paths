@@ -66,10 +66,12 @@ export async function fetchCourseDetails(courseId) {
 
   return camelCaseObject({
     id: data.course_id,
+    courseKey: data.course_id,
     number: data.number,
     org: data.org,
     run: data.id.split(':')[1].split('+')[2],
     name: data.name,
+    displayName: data.name, // Use name as displayName for consistency with discovery API
     shortDescription: data.short_description,
     endDate: data.end,
     startDate: data.start,
