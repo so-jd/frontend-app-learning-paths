@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Button, ButtonGroup, Form, Icon, IconButton,
 } from '@openedx/paragon';
-import { FilterList, Close } from '@openedx/paragon/icons';
+import { Close } from '@openedx/paragon/icons';
 
 const FilterPanel = ({
   selectedContentType,
@@ -19,116 +19,141 @@ const FilterPanel = ({
   isSmall,
   onClearAll,
 }) => (
-  <div className="pl-3 pr-3 pt-2 mt-4.5">
-    <div className="d-flex justify-content-between align-items-center mb-3">
-      <h4 className="mb-0">Filter</h4>
+  <div className="filter-sidebar-content">
+    <div className="filter-header">
+      <h4 className="mb-0">Filters</h4>
       {!isSmall && (
-        <Button variant="link" onClick={onClearAll} className="pr-4 filter-clear-link">Clear all</Button>
+        <Button variant="link" onClick={onClearAll} className="filter-clear-link">Clear all</Button>
       )}
-      <IconButton
-        src={isSmall ? Close : FilterList}
-        iconAs={Icon}
-        onClick={onClose}
-        className="position-absolute"
-        alt="Close filter"
-        isActive
-        style={{
-          top: '2.3rem',
-          right: isSmall ? '1rem' : '-18px',
-          zIndex: 1000,
-          width: '36px',
-          height: '36px',
-          backgroundColor: isSmall ? 'transparent' : 'var(--icon-blue)',
-          color: isSmall ? 'black' : 'white',
-        }}
-      />
+      {isSmall && (
+        <IconButton
+          src={Close}
+          iconAs={Icon}
+          onClick={onClose}
+          alt="Close filters"
+          size="sm"
+        />
+      )}
     </div>
 
-    {/* Content Type Tabs */}
-    <div className="my-3">
-      <ButtonGroup className="filter-content-buttons">
+    {/* Content Type Section */}
+    <div className="filter-section">
+      <h5 className="filter-section-title">Content Type</h5>
+      <div className="content-type-grid">
         <Button
-          variant={selectedContentType === 'All' ? 'primary' : 'outline-secondary'}
+          variant={selectedContentType === 'All' ? 'primary' : 'outline-primary'}
           onClick={() => onSelectContentType('All')}
-          active={selectedContentType === 'All'}
+          className="filter-grid-btn"
         >
           All
         </Button>
         <Button
-          variant={selectedContentType === 'course' ? 'primary' : 'outline-secondary'}
+          variant={selectedContentType === 'course' ? 'primary' : 'outline-primary'}
           onClick={() => onSelectContentType('course')}
-          active={selectedContentType === 'course'}
+          className="filter-grid-btn"
         >
           Courses
         </Button>
         <Button
-          variant={selectedContentType === 'learning_path' ? 'primary' : 'outline-secondary'}
+          variant={selectedContentType === 'learning_path' ? 'primary' : 'outline-primary'}
           onClick={() => onSelectContentType('learning_path')}
-          active={selectedContentType === 'learning_path'}
+          className="filter-grid-btn"
         >
-          Learning Paths
+          Paths
         </Button>
-      </ButtonGroup>
+      </div>
     </div>
 
-    {/* Status Checkboxes */}
-    <div className="my-3">
-      <Form.Group>
-        <Form.Label className="h4 my-3">My Progress</Form.Label>
-        <Form.CheckboxSet
-          name="progress-status"
-          onChange={e => onChangeStatus(e.target.value, e.target.checked)}
-          value={selectedStatuses}
-        >
-          <Form.Checkbox value="In progress" className="font-weight-light">In progress</Form.Checkbox>
-          <Form.Checkbox value="Not started" className="font-weight-light">Not started</Form.Checkbox>
-          <Form.Checkbox value="Completed" className="font-weight-light">Completed</Form.Checkbox>
-        </Form.CheckboxSet>
-      </Form.Group>
+    {/* My Progress Section */}
+    <div className="filter-section">
+      <h5 className="filter-section-title">My Progress</h5>
+      <div className="status-filter-checkboxes">
+        <Form.Check
+          type="checkbox"
+          id="status-in-progress"
+          label="In progress"
+          checked={selectedStatuses.includes('In progress')}
+          onChange={(e) => onChangeStatus('In progress', e.target.checked)}
+          className="filter-checkbox"
+        />
+        <Form.Check
+          type="checkbox"
+          id="status-not-started"
+          label="Not started"
+          checked={selectedStatuses.includes('Not started')}
+          onChange={(e) => onChangeStatus('Not started', e.target.checked)}
+          className="filter-checkbox"
+        />
+        <Form.Check
+          type="checkbox"
+          id="status-completed"
+          label="Completed"
+          checked={selectedStatuses.includes('Completed')}
+          onChange={(e) => onChangeStatus('Completed', e.target.checked)}
+          className="filter-checkbox"
+        />
+      </div>
     </div>
 
-    {/* Date Status Checkboxes */}
-    <div className="my-3">
-      <Form.Group>
-        <Form.Label className="h4 my-3">Course / Learning Path Status</Form.Label>
-        <Form.CheckboxSet
-          name="date-status"
-          onChange={e => onChangeDateStatus(e.target.value, e.target.checked)}
-          value={selectedDateStatuses}
-        >
-          <Form.Checkbox value="Open" className="font-weight-light">Open</Form.Checkbox>
-          <Form.Checkbox value="Upcoming" className="font-weight-light">Upcoming</Form.Checkbox>
-          <Form.Checkbox value="Ended" className="font-weight-light">Ended</Form.Checkbox>
-        </Form.CheckboxSet>
-      </Form.Group>
+    {/* Date Status Section */}
+    <div className="filter-section">
+      <h5 className="filter-section-title">Course / Path Status</h5>
+      <div className="status-filter-checkboxes">
+        <Form.Check
+          type="checkbox"
+          id="date-status-open"
+          label="Open"
+          checked={selectedDateStatuses.includes('Open')}
+          onChange={(e) => onChangeDateStatus('Open', e.target.checked)}
+          className="filter-checkbox"
+        />
+        <Form.Check
+          type="checkbox"
+          id="date-status-upcoming"
+          label="Upcoming"
+          checked={selectedDateStatuses.includes('Upcoming')}
+          onChange={(e) => onChangeDateStatus('Upcoming', e.target.checked)}
+          className="filter-checkbox"
+        />
+        <Form.Check
+          type="checkbox"
+          id="date-status-ended"
+          label="Ended"
+          checked={selectedDateStatuses.includes('Ended')}
+          onChange={(e) => onChangeDateStatus('Ended', e.target.checked)}
+          className="filter-checkbox"
+        />
+      </div>
     </div>
 
-    {/* Organization Checkboxes */}
+    {/* Organization Section */}
     {organizations && Object.keys(organizations).length > 0 && (
-      <div className="my-3">
-        <Form.Group>
-          <Form.Label className="h4 my-3">Program Type</Form.Label>
-          <Form.CheckboxSet
-            name="organization"
-            onChange={e => onChangeOrg(e.target.value, e.target.checked)}
-            value={selectedOrgs}
-          >
-            {Object.entries(organizations).map(([shortName, org]) => (
-              <Form.Checkbox key={shortName} value={shortName} className="font-weight-light">
-                {org.name || shortName}
-              </Form.Checkbox>
-            ))}
-          </Form.CheckboxSet>
-        </Form.Group>
+      <div className="filter-section">
+        <h5 className="filter-section-title">Program Type</h5>
+        <div className="status-filter-checkboxes">
+          {Object.entries(organizations).map(([shortName, org]) => (
+            <Form.Check
+              key={shortName}
+              type="checkbox"
+              id={`org-${shortName}`}
+              label={org.name || shortName}
+              checked={selectedOrgs.includes(shortName)}
+              onChange={(e) => onChangeOrg(shortName, e.target.checked)}
+              className="filter-checkbox"
+            />
+          ))}
+        </div>
       </div>
     )}
 
     {/* Action Buttons */}
     {isSmall && (
-      <ButtonGroup className="pb-4 filter-actions">
-        <Button variant="outline-secondary" onClick={onClearAll}>Clear all</Button>
-        <Button variant="primary" onClick={onClose} className="pl-3">Apply</Button>
-      </ButtonGroup>
+      <div className="filter-actions">
+        <ButtonGroup className="w-100">
+          <Button variant="outline-secondary" onClick={onClearAll}>Clear all</Button>
+          <Button variant="primary" onClick={onClose}>Apply</Button>
+        </ButtonGroup>
+      </div>
     )}
   </div>
 );

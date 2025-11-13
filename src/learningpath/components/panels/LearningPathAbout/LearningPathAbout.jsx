@@ -2,13 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Container, Card, Button, Badge, Icon, Spinner, IconButton, Alert,
 } from '@openedx/paragon';
-import { Close, FormatListBulleted, CalendarMonth, Award, CheckCircle, School } from '@openedx/paragon/icons';
+import {
+  Close, FormatListBulleted, CalendarMonth, Award, CheckCircle, School,
+} from '@openedx/paragon/icons';
+import { getConfig } from '@edx/frontend-platform';
 import {
   useLearningPathDetail,
   useEnrollLearningPath,
   useCoursesByIds,
 } from '../../../data/queries';
-import { getConfig } from '@edx/frontend-platform';
 import CourseAbout from '../CourseAbout';
 import './LearningPathAbout.css';
 
@@ -21,7 +23,7 @@ const LearningPathAbout = ({ learningPathKey, isOpen, onClose }) => {
 
   // Extract course keys from steps
   const courseKeys = useMemo(() => {
-    if (!learningPath?.steps) return [];
+    if (!learningPath?.steps) { return []; }
     return learningPath.steps.map(step => step.courseKey);
   }, [learningPath]);
 
@@ -32,7 +34,7 @@ const LearningPathAbout = ({ learningPathKey, isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       // Save current scroll position
-      const scrollY = window.scrollY;
+      const { scrollY } = window;
 
       // Add class to body to prevent scroll
       document.body.classList.add('panel-open');

@@ -4,11 +4,13 @@ import {
   Form, Image, Spinner, Icon, Badge,
 } from '@openedx/paragon';
 import { Close, FilterList, CheckCircle } from '@openedx/paragon/icons';
-import { useCourseDiscoveryWithEnrollments, useLearningPaths, useTaxonomies, useAllObjectTags } from '../data/queries';
-import { useScreenSize } from '../../hooks/useScreenSize';
-import noResultsSVG from '../../assets/no_results.svg';
 import { getConfig } from '@edx/frontend-platform';
 import { useNavigate } from 'react-router-dom';
+import {
+  useCourseDiscoveryWithEnrollments, useLearningPaths, useTaxonomies, useAllObjectTags,
+} from '../data/queries';
+import { useScreenSize } from '../../hooks/useScreenSize';
+import noResultsSVG from '../../assets/no_results.svg';
 import CourseAbout from '../components/panels/CourseAbout';
 import LearningPathAbout from '../components/panels/LearningPathAbout';
 import '../index.css';
@@ -55,6 +57,10 @@ const Explore = () => {
   // Add status to items based on enrollment and completion, and merge tags
   const itemsWithStatus = useMemo(() => {
     const items = [...discoveryCourses, ...(learningPaths || [])];
+    // Debug: Log learning paths data
+    if (learningPaths && learningPaths.length > 0) {
+      console.log('Learning paths data:', learningPaths);
+    }
     return items.map(item => {
       // Determine status
       let status = 'not-enrolled';
@@ -200,7 +206,7 @@ const Explore = () => {
     // For learning paths, use item.image; for courses, use item.courseImageUrl
     let imageUrl = isLearningPath ? item.image : item.courseImageUrl;
     const courseName = item.displayName;
-    const orgName = item.org;
+    const orgName = isLearningPath ? item.subtitle : item.org;
 
     // If image URL is relative, prepend LMS base URL
     if (imageUrl && !imageUrl.startsWith('http')) {
@@ -347,153 +353,153 @@ const Explore = () => {
   return (
     <>
       <div className="explore-page-container">
-      {/* Collapsible Filter Sidebar */}
-      <aside className={`filter-sidebar-container ${showFilters ? 'open' : 'closed'}`}>
-        <div className="filter-sidebar-content">
-          <div className="filter-header">
-            <h4 className="mb-0">Filters</h4>
-            <IconButton
-              src={Close}
-              iconAs={Icon}
-              alt="Close filters"
-              onClick={() => setShowFilters(false)}
-              size="sm"
-            />
-          </div>
-
-          {/* Content Type Tabs */}
-          <div className="filter-section">
-            <h5 className="filter-section-title">Content Type</h5>
-            <div className="content-type-grid">
-              <Button
-                variant={selectedTab === 'all' ? 'primary' : 'outline-primary'}
-                onClick={() => setSelectedTab('all')}
-                className="filter-grid-btn"
-              >
-                All
-              </Button>
-              <Button
-                variant={selectedTab === 'courses' ? 'primary' : 'outline-primary'}
-                onClick={() => setSelectedTab('courses')}
-                className="filter-grid-btn"
-              >
-                Courses
-              </Button>
-              <Button
-                variant={selectedTab === 'learning_paths' ? 'primary' : 'outline-primary'}
-                onClick={() => setSelectedTab('learning_paths')}
-                className="filter-grid-btn"
-              >
-                Learning Paths
-              </Button>
+        {/* Collapsible Filter Sidebar */}
+        <aside className={`filter-sidebar-container ${showFilters ? 'open' : 'closed'}`}>
+          <div className="filter-sidebar-content">
+            <div className="filter-header">
+              <h4 className="mb-0">Filters</h4>
+              <IconButton
+                src={Close}
+                iconAs={Icon}
+                alt="Close filters"
+                onClick={() => setShowFilters(false)}
+                size="sm"
+              />
             </div>
-          </div>
 
-          {/* Status Filter */}
-          <div className="filter-section">
-            <h5 className="filter-section-title">Status</h5>
-            <div className="status-filter-checkboxes">
-              {statusOptions.map(status => (
-                <Form.Check
-                  key={status.value}
-                  type="checkbox"
-                  id={`status-${status.value}`}
-                  label={status.label}
-                  checked={selectedStatuses.includes(status.value)}
-                  onChange={(e) => handleStatusChange(status.value, e.target.checked)}
-                  className="filter-checkbox"
-                />
-              ))}
+            {/* Content Type Tabs */}
+            <div className="filter-section">
+              <h5 className="filter-section-title">Content Type</h5>
+              <div className="content-type-grid">
+                <Button
+                  variant={selectedTab === 'all' ? 'primary' : 'outline-primary'}
+                  onClick={() => setSelectedTab('all')}
+                  className="filter-grid-btn"
+                >
+                  All
+                </Button>
+                <Button
+                  variant={selectedTab === 'courses' ? 'primary' : 'outline-primary'}
+                  onClick={() => setSelectedTab('courses')}
+                  className="filter-grid-btn"
+                >
+                  Courses
+                </Button>
+                <Button
+                  variant={selectedTab === 'learning_paths' ? 'primary' : 'outline-primary'}
+                  onClick={() => setSelectedTab('learning_paths')}
+                  className="filter-grid-btn"
+                >
+                  Learning Paths
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {/* Tag Filter */}
-          <div className="filter-section">
-            <h5 className="filter-section-title">Tags</h5>
-            <div className="status-filter-checkboxes">
-              {displayedTags.length > 0 ? (
-                displayedTags.map(tag => (
+            {/* Status Filter */}
+            <div className="filter-section">
+              <h5 className="filter-section-title">Status</h5>
+              <div className="status-filter-checkboxes">
+                {statusOptions.map(status => (
                   <Form.Check
-                    key={tag.id}
+                    key={status.value}
                     type="checkbox"
-                    id={`tag-${tag.id}`}
-                    label={`${tag.value} (${tag.taxonomyName})`}
-                    checked={selectedTags.includes(tag.id)}
-                    onChange={(e) => handleTagChange(tag.id, e.target.checked)}
+                    id={`status-${status.value}`}
+                    label={status.label}
+                    checked={selectedStatuses.includes(status.value)}
+                    onChange={(e) => handleStatusChange(status.value, e.target.checked)}
                     className="filter-checkbox"
                   />
-                ))
-              ) : (
-                <p className="text-muted small">
-                  No tags found. Tag courses in Studio to enable filtering.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Filter Toggle Button - Fixed position */}
-      <IconButton
-        src={FilterList}
-        iconAs={Icon}
-        alt="Toggle filters"
-        onClick={() => setShowFilters(!showFilters)}
-        className="filter-toggle-icon-btn"
-        variant="primary"
-      />
-
-      {/* Main Content */}
-      <main className={`explore-main-content ${showFilters ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <Container fluid className="px-3 px-md-4 py-4">
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-            <div className="d-flex align-items-center gap-3">
-              <div>
-                <h1 className="mb-1">Explore</h1>
-                <div className="text-muted">
-                  Showing {filteredItems.length} of {itemsWithStatus.length}
-                </div>
+                ))}
               </div>
             </div>
-            <SearchField
-              onClear={() => setSearchQuery('')}
-              onChange={setSearchQuery}
-              onSubmit={() => {}}
-              value={searchQuery}
-              placeholder="Search"
-              className="w-100 w-md-50"
-              style={{ maxWidth: isSmall ? '100%' : '400px' }}
-            />
-          </div>
 
-          {(() => {
-            if (isLoading) {
-              return (
-                <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-                  <Spinner animation="border" variant="primary" />
-                </div>
-              );
-            }
-            if (filteredItems.length === 0) {
-              return (
-                <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">
-                  <Image src={noResultsSVG} alt="No results" className="mb-4" style={{ maxWidth: '300px' }} />
-                  <div>
-                    <h3 className="my-2">No matching results</h3>
-                    <p className="text-muted">Try another search or adjust your filters</p>
+            {/* Tag Filter */}
+            <div className="filter-section">
+              <h5 className="filter-section-title">Tags</h5>
+              <div className="status-filter-checkboxes">
+                {displayedTags.length > 0 ? (
+                  displayedTags.map(tag => (
+                    <Form.Check
+                      key={tag.id}
+                      type="checkbox"
+                      id={`tag-${tag.id}`}
+                      label={`${tag.value} (${tag.taxonomyName})`}
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={(e) => handleTagChange(tag.id, e.target.checked)}
+                      className="filter-checkbox"
+                    />
+                  ))
+                ) : (
+                  <p className="text-muted small">
+                    No tags found. Tag courses in Studio to enable filtering.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Filter Toggle Button - Fixed position */}
+        <IconButton
+          src={FilterList}
+          iconAs={Icon}
+          alt="Toggle filters"
+          onClick={() => setShowFilters(!showFilters)}
+          className="filter-toggle-icon-btn"
+          variant="primary"
+        />
+
+        {/* Main Content */}
+        <main className={`explore-main-content ${showFilters ? 'sidebar-open' : 'sidebar-closed'}`}>
+          <Container fluid className="px-3 px-md-4 py-4">
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+              <div className="d-flex align-items-center gap-3">
+                <div>
+                  <h1 className="mb-1">Explore</h1>
+                  <div className="text-muted">
+                    Showing {filteredItems.length} of {itemsWithStatus.length}
                   </div>
                 </div>
-              );
-            }
-            return (
-              <div className="courses-grid">
-                {filteredItems.map(item => renderCard(item))}
               </div>
-            );
-          })()}
-        </Container>
-      </main>
-    </div>
+              <SearchField
+                onClear={() => setSearchQuery('')}
+                onChange={setSearchQuery}
+                onSubmit={() => {}}
+                value={searchQuery}
+                placeholder="Search"
+                className="w-100 w-md-50"
+                style={{ maxWidth: isSmall ? '100%' : '400px' }}
+              />
+            </div>
+
+            {(() => {
+              if (isLoading) {
+                return (
+                  <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+                    <Spinner animation="border" variant="primary" />
+                  </div>
+                );
+              }
+              if (filteredItems.length === 0) {
+                return (
+                  <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">
+                    <Image src={noResultsSVG} alt="No results" className="mb-4" style={{ maxWidth: '300px' }} />
+                    <div>
+                      <h3 className="my-2">No matching results</h3>
+                      <p className="text-muted">Try another search or adjust your filters</p>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div className="courses-grid">
+                  {filteredItems.map(item => renderCard(item))}
+                </div>
+              );
+            })()}
+          </Container>
+        </main>
+      </div>
 
       {/* Course About Side Panel */}
       <CourseAbout

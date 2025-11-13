@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Spinner, Col, Button, Pagination, Icon, IconButton, SearchField, Image, Bubble, Alert,
+  Spinner, Container, Col, Button, Pagination, Icon, IconButton, SearchField, Image, Bubble, Alert, Stack,
 } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform';
 import { FilterAlt, FilterList, Search } from '@openedx/paragon/icons';
@@ -105,7 +105,6 @@ const Dashboard = () => {
   useEffect(() => {
     localStorage.setItem(selectedDateStatusesKey, JSON.stringify(selectedDateStatuses));
   }, [selectedDateStatuses]);
-  useEffect(() => { localStorage.setItem(selectedOrgsKey, JSON.stringify(selectedOrgs)); }, [selectedOrgs]);
   useEffect(() => { localStorage.setItem(selectedOrgsKey, JSON.stringify(selectedOrgs)); }, [selectedOrgs]);
 
   const handleStatusChange = (status, isChecked) => {
@@ -276,121 +275,155 @@ const Dashboard = () => {
           </Link>.
         </Alert>
       )}
-      <div className="dashboard m-4.5">
-        {isLoading ? (
-          <div className="d-flex justify-content-center align-items-center vh-100">
-            <Spinner animation="border" variant="primary" />
-          </div>
-        ) : (
-          <>
-            {showFilters && (
-              <div className={`filter-panel sidebar position-absolute open ${isSmall ? 'mobile' : ''}`}>
-                <FilterPanel
-                  selectedContentType={selectedContentType}
-                  onSelectContentType={setSelectedContentType}
-                  selectedStatuses={selectedStatuses}
-                  onChangeStatus={handleStatusChange}
-                  selectedDateStatuses={selectedDateStatuses}
-                  onChangeDateStatus={handleDateStatusChange}
-                  selectedOrgs={selectedOrgs}
-                  onChangeOrg={handleOrgChange}
-                  organizations={availableOrganizations}
-                  onClose={() => setShowFilters(false)}
-                  isSmall={isSmall}
-                  onClearAll={handleClearFilters}
-                />
-              </div>
-            )}
-            <div className={`dashboard-content ${showFilters ? 'shifted' : ''} ${showFilters && isSmall ? 'd-none' : ''}`}>
-              <div className="dashboard-header d-flex justify-content-between align-items-center">
-                <h2>My Learning</h2>
-                {!isSmall ? (
-                  <div className="d-flex align-items-center gap-2">
-                    <SearchField
-                      onClear={() => setSearchQuery('')}
-                      onChange={setSearchQuery}
-                      onSubmit={() => {}}
-                      value={searchQuery}
-                      placeholder="Search"
+      <div className="dashboard-page-container">
+        {/* Filter Sidebar */}
+        <aside className={`filter-sidebar-container ${showFilters ? 'open' : 'closed'}`}>
+          <FilterPanel
+            selectedContentType={selectedContentType}
+            onSelectContentType={setSelectedContentType}
+            selectedStatuses={selectedStatuses}
+            onChangeStatus={handleStatusChange}
+            selectedDateStatuses={selectedDateStatuses}
+            onChangeDateStatus={handleDateStatusChange}
+            selectedOrgs={selectedOrgs}
+            onChangeOrg={handleOrgChange}
+            organizations={availableOrganizations}
+            onClose={() => setShowFilters(false)}
+            isSmall={isSmall}
+            onClearAll={handleClearFilters}
+          />
+        </aside>
+
+        {/* Main Content */}
+        <main className={`dashboard-main-content ${showFilters ? 'sidebar-open' : 'sidebar-closed'}`}>
+          <Container size="xl" className="dashboard py-4">
+            {isLoading ? (
+              <Stack direction="vertical" className="justify-content-center align-items-center vh-100">
+                <Spinner animation="border" variant="primary" />
+              </Stack>
+            ) : (
+              <div className={`${showFilters && isSmall ? 'd-none' : ''}`}>
+                {/* Filter Toggle Button - Pushes content */}
+                {!isSmall && (
+                  <div className="filter-toggle-wrapper mb-3">
+                    <IconButton
+                      src={FilterList}
+                      iconAs={Icon}
+                      alt="Toggle filters"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="filter-toggle-btn"
+                      variant="primary"
                     />
-                    <Button variant="brand" onClick={() => navigate('/explore')}>
-                      Explore
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="d-flex align-items-center gap-2">
-                    <Button variant="brand" size="sm" onClick={() => navigate('/explore')}>
-                      Explore
-                    </Button>
-                    <IconButton src={Search} iconAs={Icon} variant="black" alt="Search" onClick={handleMobileSearchClick} />
-                    <div className="d-inline-block">
-                      <IconButton src={FilterList} iconAs={Icon} variant="black" alt="Filter" onClick={() => setShowFilters(true)} />
-                      {activeFiltersCount > 0 && (
-                        <Bubble className="position-absolute mt-4 ml-n3.5">{activeFiltersCount}</Bubble>
-                      )}
-                    </div>
                   </div>
                 )}
-              </div>
-              {isSmall && showMobileSearch && (
-                <div className="mobile-search" ref={mobileSearchRef}>
+                <Stack direction="horizontal" gap={3} className="dashboard-header justify-content-between align-items-center mb-4">
+                  <h2 className="mb-0">My Learning</h2>
+                  {!isSmall ? (
+                    <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
+                      <div className="dashboard-search-wrapper">
+                        <SearchField
+                          onClear={() => setSearchQuery('')}
+                          onChange={setSearchQuery}
+                          onSubmit={() => {}}
+                          value={searchQuery}
+                          placeholder="Search courses and paths"
+                          screenReaderText="Search"
+                        />
+                      </div>
+                      <Button variant="brand" onClick={() => navigate('/explore')}>
+                        Explore
+                      </Button>
+                    </Stack>
+                  ) : (
+                    <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
+                      <Button variant="brand" size="sm" onClick={() => navigate('/explore')}>
+                        Explore
+                      </Button>
+                      <IconButton
+                        src={Search}
+                        iconAs={Icon}
+                        variant="black"
+                        alt="Search"
+                        onClick={handleMobileSearchClick}
+                        aria-label="Open search"
+                      />
+                      <div className="position-relative">
+                        <IconButton
+                          src={FilterList}
+                          iconAs={Icon}
+                          variant="black"
+                          alt="Filter"
+                          onClick={() => setShowFilters(true)}
+                          aria-label="Open filters"
+                        />
+                        {activeFiltersCount > 0 && (
+                        <Bubble className="position-absolute" style={{ top: '-0.5rem', right: '-0.5rem' }}>{activeFiltersCount}</Bubble>
+                        )}
+                      </div>
+                    </Stack>
+                  )}
+                </Stack>
+                {isSmall && showMobileSearch && (
+                <div className="mobile-search-wrapper mb-3" ref={mobileSearchRef}>
                   <SearchField
                     onClear={() => setSearchQuery('')}
                     onChange={setSearchQuery}
                     onSubmit={() => {}}
                     onBlur={handleMobileSearchBlur}
                     value={searchQuery}
-                    placeholder="Search"
+                    placeholder="Search courses and paths"
+                    screenReaderText="Search"
                   />
                 </div>
-              )}
-              <div className="d-flex justify-content-between align-items-center">
-                {!showFilters && !isSmall && (
+                )}
+                <Stack direction="horizontal" gap={3} className="justify-content-between align-items-center mb-3">
+                  {isSmall && (
                   <Button onClick={() => setShowFilters(true)} variant="secondary" className="filter-button border-0">
                     <Icon src={FilterAlt} /> Filter
                   </Button>
-                )}
-                <div className="small text-muted">
-                  Showing <b>{showingCount}</b> of <b>{totalCount}</b>
-                </div>
-              </div>
-              <hr className={`mt-0 mb-4 ${showFilters || isSmall ? 'invisible' : 'visible'}`} />
-              {sortedItems.length === 0 ? (
-                <div className="d-flex flex-column align-items-center justify-content-center text-center py-5">
-                  <Image src={noResultsSVG} alt="No results" className="mb-4" />
-                  <div>
-                    <div className="h3 my-2">No matching results</div>
-                    <div className="text-muted">Try another search or clear your filters</div>
+                  )}
+                  <div className={`small text-muted ${isSmall ? 'ms-auto' : ''}`}>
+                    Showing <b>{showingCount}</b> of <b>{totalCount}</b>
                   </div>
-                </div>
-              ) : (
-                <>
-                  {paginatedItems.map(item => (
-                    <Col xs={12} lg={11} xl={10} key={item.id || item.key} className={`dashboard-item p-0 mb-4 ${showFilters ? '' : 'mr-auto mx-auto'}`}>
-                      {item.type === 'course'
-                        ? (
-                          <CourseCard
-                            course={item}
-                            relatedLearningPaths={item.learningPaths}
-                            showFilters={showFilters}
-                          />
-                        )
-                        : <LearningPathCard learningPath={item} showFilters={showFilters} />}
-                    </Col>
-                  ))}
-                  <Pagination
-                    paginationLabel="learning items navigation"
-                    variant={isSmall ? 'reduced' : 'default'}
-                    pageCount={totalPages}
-                    currentPage={currentPage}
-                    onPageSelect={page => setCurrentPage(page)}
-                    className="d-flex justify-content-center mt-4"
-                  />
-                </>
-              )}
-            </div>
-          </>
-        )}
+                </Stack>
+                <hr className="mt-0 mb-4" />
+                {sortedItems.length === 0 ? (
+                  <Stack direction="vertical" gap={4} className="align-items-center justify-content-center text-center py-5">
+                    <Image src={noResultsSVG} alt="No results" />
+                    <Stack direction="vertical" gap={2}>
+                      <h3>No matching results</h3>
+                      <p className="text-muted mb-0">Try another search or clear your filters</p>
+                    </Stack>
+                  </Stack>
+                ) : (
+                  <>
+                    {paginatedItems.map(item => (
+                      <Col xs={12} lg={11} xl={10} key={item.id || item.key} className={`dashboard-item p-0 mb-4 ${showFilters ? '' : 'mr-auto mx-auto'}`}>
+                        {item.type === 'course'
+                          ? (
+                            <CourseCard
+                              course={item}
+                              relatedLearningPaths={item.learningPaths}
+                              showFilters={showFilters}
+                            />
+                          )
+                          : <LearningPathCard learningPath={item} showFilters={showFilters} />}
+                      </Col>
+                    ))}
+                    <Pagination
+                      paginationLabel="learning items navigation"
+                      variant={isSmall ? 'reduced' : 'default'}
+                      pageCount={totalPages}
+                      currentPage={currentPage}
+                      onPageSelect={page => setCurrentPage(page)}
+                      className="d-flex justify-content-center mt-4"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+          </Container>
+        </main>
       </div>
     </>
   );
