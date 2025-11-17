@@ -19,6 +19,7 @@
 
   #main-content {
     flex: 1 0 auto;
+    padding-top: 66px; /* Account for fixed header height */
 
     .alert-content{
       color: white;
@@ -41,8 +42,12 @@
   header.learning-header {
     border-bottom: 2px solid #e0e0e0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1050; /* Above filter panel to show shadow over it */
+    background-color: white; /* Ensure header has opaque background */
 
     > div {
       max-width: unset;
@@ -780,12 +785,12 @@
 .filter-sidebar-container {
   position: fixed;
   left: 0;
-  top: 66px; /* Align with header height */
+  top: 0; /* Span full page height */
   bottom: 0;
   width: 320px;
   background: white;
   border-right: 1px solid #e0e0e0;
-  z-index: 1000;
+  z-index: 1000; /* Behind header navbar (which is 1050) */
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
   backface-visibility: hidden;
@@ -802,11 +807,12 @@
 
   @media (max-width: 767px) {
     width: 100%;
-    z-index: 1050;
+    z-index: 1000; /* Keep behind header on mobile too */
   }
 
   .filter-sidebar-content {
     padding: 1.5rem;
+    padding-top: calc(66px + 1.5rem); /* Account for header height + standard padding */
   }
 
   .filter-header {
@@ -1011,12 +1017,12 @@
 .filter-sidebar-container {
   position: fixed;
   left: 0;
-  top: 66px; /* Align with header height - adjust if needed */
+  top: 0; /* Span full page height */
   bottom: 0;
   width: 320px;
   background: white;
   border-right: 1px solid #e0e0e0;
-  z-index: 1000;
+  z-index: 1000; /* Behind header navbar (which is 1050) */
   transition: transform 0.3s ease;
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
@@ -1036,11 +1042,12 @@
 
   @media (max-width: 767px) {
     width: 100%;
-    z-index: 1050;
+    z-index: 1000; /* Keep behind header on mobile too */
   }
 
   .filter-sidebar-content {
     padding: 1.5rem;
+    padding-top: calc(66px + 1.5rem); /* Account for header height + standard padding */
   }
 
   .filter-header {

@@ -330,15 +330,9 @@ const Dashboard = () => {
                           screenReaderText="Search"
                         />
                       </div>
-                      <Button variant="brand" onClick={() => navigate('/explore')}>
-                        Explore
-                      </Button>
                     </Stack>
                   ) : (
                     <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
-                      <Button variant="brand" size="sm" onClick={() => navigate('/explore')}>
-                        Explore
-                      </Button>
                       <IconButton
                         src={Search}
                         iconAs={Icon}
