@@ -426,3 +426,80 @@ export async function fetchCourseDiscovery({ searchString = '', pageSize = 20, p
     };
   }
 }
+
+/**
+ * Fetch certificate status for a specific learning path.
+ *
+ * Returns certificate eligibility, progress, grade, and award status for the current user.
+ *
+ * @param {string} learningPathKey - The learning path key (e.g., "path-v1:Org+Path+Run+Group")
+ * @returns {Promise<Object>} Certificate status data
+ */
+export async function fetchLearningPathCertificate(learningPathKey) {
+  const client = getAuthenticatedHttpClient();
+  try {
+    const response = await client.get(
+      `${getConfig().LMS_BASE_URL}/api/learning_paths/v1/${learningPathKey}/certificate/`,
+    );
+    return camelCaseObject(response.data);
+  } catch (error) {
+    // If the endpoint returns 404 or the feature is disabled, return null
+    if (error.response?.status === 404) {
+      return null;
+    }
+    // For other errors, return a default "no certificate" state
+    // eslint-disable-next-line no-console
+    console.error('Error fetching learning path certificate:', error);
+    return {
+      learningPathKey,
+      isEligible: false,
+      certificateAwarded: false,
+      progress: 0,
+      grade: 0,
+      reason: 'error_fetching_certificate',
+    };
+  }
+}
+
+/**
+ * Fetch all certificates for the current user.
+ *
+ * This fetches all awarded program certificates (learning path certificates) from the Credentials service.
+ *
+ * @returns {Promise<Array>} Array of certificate objects
+ */
+export async function fetchUserCertificates() {
+  const { username } = getAuthenticatedUser();
+  const client = getAuthenticatedHttpClient();
+
+  try {
+    const credentialsBaseUrl = getConfig().CREDENTIALS_BASE_URL || getConfig().LMS_BASE_URL;
+    const response = await client.get(
+      `${credentialsBaseUrl}/api/v2/credentials/?username=${username}&status=awarded`,
+    );
+
+    const credentials = response.data.results || [];
+
+    // Filter for program certificates only (learning path certificates)
+    const programCertificates = credentials.filter(
+      cert => cert.credential?.type === 'program',
+    );
+
+    return camelCaseObject(programCertificates.map(cert => ({
+      uuid: cert.uuid,
+      username: cert.username,
+      status: cert.status,
+      certificateUrl: cert.certificate_url || `${credentialsBaseUrl}/credentials/${cert.uuid}/`,
+      downloadUrl: cert.download_url,
+      programUuid: cert.credential?.program_uuid,
+      programName: cert.credential?.title || 'Learning Path Certificate',
+      issuedDate: cert.created,
+      attributes: cert.attributes || [],
+    })));
+  } catch (error) {
+    // If credentials service is not available or endpoint doesn't exist, return empty array
+    // eslint-disable-next-line no-console
+    console.error('Error fetching user certificates:', error);
+    return [];
+  }
+}

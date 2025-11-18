@@ -13,6 +13,8 @@ export const QUERY_KEYS = {
   ALL_LEARNING_PATHS: ['learningPaths'],
   LEARNING_PATH_DETAIL: (key) => ['learningPath', key],
   LEARNING_PATH_PROGRESS: (key) => ['learningPathProgress', key],
+  LEARNING_PATH_CERTIFICATE: (key) => ['learningPathCertificate', key],
+  USER_CERTIFICATES: ['userCertificates'],
   LEARNER_DASHBOARD: ['learnerDashboard'],
   COURSE_DETAILS: (courseId) => ['course', courseId],
   COURSE_COMPLETIONS: ['courseCompletions'],
@@ -36,6 +38,8 @@ export const STALE_TIMES = {
   COURSE_ENROLLMENTS: 60 * 1000, // 1 minute
 
   COMPLETIONS: 60 * 1000, // 1 minute
+
+  CERTIFICATES: 5 * 60 * 1000, // 5 minutes
 
   ORGANIZATIONS: 60 * 60 * 1000, // 1 hour
 };
@@ -506,3 +510,47 @@ export const useCoursePrerequisites = (courseKey) => useQuery({
   enabled: !!courseKey,
   staleTime: STALE_TIMES.COURSE_DETAIL, // 5 minutes
 });
+
+// Certificate Queries
+
+/**
+ * Hook to fetch certificate status for a specific learning path.
+ *
+ * Returns certificate eligibility, progress, grade, and award status for the current user.
+ */
+export const useLearningPathCertificate = (learningPathKey) => useQuery({
+  queryKey: QUERY_KEYS.LEARNING_PATH_CERTIFICATE(learningPathKey),
+  queryFn: () => api.fetchLearningPathCertificate(learningPathKey),
+  enabled: !!learningPathKey,
+  staleTime: STALE_TIMES.CERTIFICATES,
+});
+
+/**
+ * Hook to fetch all certificates for the current user.
+ *
+ * Returns all awarded program certificates (learning path certificates).
+ */
+export const useUserCertificates = () => useQuery({
+  queryKey: QUERY_KEYS.USER_CERTIFICATES,
+  queryFn: api.fetchUserCertificates,
+  staleTime: STALE_TIMES.CERTIFICATES,
+});
+
+/**
+ * Hook to prefetch certificate status when hovering.
+ *
+ * Useful for preloading certificate data before user navigates to details page.
+ */
+export const usePrefetchLearningPathCertificate = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback((learningPathKey) => {
+    if (learningPathKey) {
+      queryClient.prefetchQuery({
+        queryKey: QUERY_KEYS.LEARNING_PATH_CERTIFICATE(learningPathKey),
+        queryFn: () => api.fetchLearningPathCertificate(learningPathKey),
+        staleTime: STALE_TIMES.CERTIFICATES,
+      });
+    }
+  }, [queryClient]);
+};
