@@ -134,13 +134,6 @@ const Dashboard = () => {
     });
   };
 
-  const handleClearFilters = () => {
-    setSelectedContentType('All');
-    setSelectedStatuses([]);
-    setSelectedDateStatuses([]);
-    setSelectedOrgs([]);
-  };
-
   // Get only the organizations that are present in the user's items.
   const availableOrganizations = useMemo(() => {
     if (!organizations || !items.length) { return {}; }
@@ -290,98 +283,97 @@ const Dashboard = () => {
             organizations={availableOrganizations}
             onClose={() => setShowFilters(false)}
             isSmall={isSmall}
-            onClearAll={handleClearFilters}
           />
         </aside>
 
         {/* Main Content */}
         <main className={`dashboard-main-content ${showFilters ? 'sidebar-open' : 'sidebar-closed'}`}>
           <Container size="xl" className="dashboard py-4">
-            {isLoading ? (
-              <Stack direction="vertical" className="justify-content-center align-items-center vh-100">
-                <Spinner animation="border" variant="primary" />
-              </Stack>
-            ) : (
-              <div className={`${showFilters && isSmall ? 'd-none' : ''}`}>
-                {/* Filter Toggle Button - Pushes content */}
-                {!isSmall && (
-                  <div className="filter-toggle-wrapper mb-3">
-                    <IconButton
-                      src={FilterList}
-                      iconAs={Icon}
-                      alt="Toggle filters"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="filter-toggle-btn"
-                      variant="primary"
-                    />
-                  </div>
-                )}
-                <Stack direction="horizontal" gap={3} className="dashboard-header justify-content-between align-items-center mb-4">
+            <div className={`${showFilters && isSmall ? 'd-none' : ''}`}>
+              <Stack direction="horizontal" gap={3} className="dashboard-header justify-content-between align-items-center mb-4">
+                <Stack direction="horizontal" gap={3} className="align-items-center">
                   <h2 className="mb-0">My Learning</h2>
-                  {!isSmall ? (
-                    <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
-                      <div className="dashboard-search-wrapper">
-                        <SearchField
-                          onClear={() => setSearchQuery('')}
-                          onChange={setSearchQuery}
-                          onSubmit={() => {}}
-                          value={searchQuery}
-                          placeholder="Search courses and paths"
-                          screenReaderText="Search"
-                        />
-                      </div>
-                    </Stack>
-                  ) : (
-                    <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
+                  {!isSmall && (
+                    <Button
+                      variant="outline-primary"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="d-flex align-items-center gap-1"
+                      size="sm"
+                    >
+                      <Icon src={FilterList} className="mb-0" style={{ width: '20px', height: '20px' }} />
+                      Filter
+                    </Button>
+                  )}
+                </Stack>
+                {!isSmall ? (
+                  <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
+                    <div className="dashboard-search-wrapper">
+                      <SearchField
+                        onClear={() => setSearchQuery('')}
+                        onChange={setSearchQuery}
+                        onSubmit={() => {}}
+                        value={searchQuery}
+                        placeholder="Search courses and paths"
+                        screenReaderText="Search"
+                      />
+                    </div>
+                  </Stack>
+                ) : (
+                  <Stack direction="horizontal" gap={2} className="align-items-center flex-shrink-0">
+                    <IconButton
+                      src={Search}
+                      iconAs={Icon}
+                      variant="black"
+                      alt="Search"
+                      onClick={handleMobileSearchClick}
+                      aria-label="Open search"
+                    />
+                    <div className="position-relative">
                       <IconButton
-                        src={Search}
+                        src={FilterList}
                         iconAs={Icon}
                         variant="black"
-                        alt="Search"
-                        onClick={handleMobileSearchClick}
-                        aria-label="Open search"
+                        alt="Filter"
+                        onClick={() => setShowFilters(true)}
+                        aria-label="Open filters"
                       />
-                      <div className="position-relative">
-                        <IconButton
-                          src={FilterList}
-                          iconAs={Icon}
-                          variant="black"
-                          alt="Filter"
-                          onClick={() => setShowFilters(true)}
-                          aria-label="Open filters"
-                        />
-                        {activeFiltersCount > 0 && (
-                        <Bubble className="position-absolute" style={{ top: '-0.5rem', right: '-0.5rem' }}>{activeFiltersCount}</Bubble>
-                        )}
-                      </div>
-                    </Stack>
-                  )}
-                </Stack>
-                {isSmall && showMobileSearch && (
-                <div className="mobile-search-wrapper mb-3" ref={mobileSearchRef}>
-                  <SearchField
-                    onClear={() => setSearchQuery('')}
-                    onChange={setSearchQuery}
-                    onSubmit={() => {}}
-                    onBlur={handleMobileSearchBlur}
-                    value={searchQuery}
-                    placeholder="Search courses and paths"
-                    screenReaderText="Search"
-                  />
-                </div>
+                      {activeFiltersCount > 0 && (
+                      <Bubble className="position-absolute" style={{ top: '-0.5rem', right: '-0.5rem' }}>{activeFiltersCount}</Bubble>
+                      )}
+                    </div>
+                  </Stack>
                 )}
-                <Stack direction="horizontal" gap={3} className="justify-content-between align-items-center mb-3">
-                  {isSmall && (
-                  <Button onClick={() => setShowFilters(true)} variant="secondary" className="filter-button border-0">
-                    <Icon src={FilterAlt} /> Filter
-                  </Button>
-                  )}
-                  <div className={`small text-muted ${isSmall ? 'ms-auto' : ''}`}>
-                    Showing <b>{showingCount}</b> of <b>{totalCount}</b>
-                  </div>
+              </Stack>
+              {isSmall && showMobileSearch && (
+              <div className="mobile-search-wrapper mb-3" ref={mobileSearchRef}>
+                <SearchField
+                  onClear={() => setSearchQuery('')}
+                  onChange={setSearchQuery}
+                  onSubmit={() => {}}
+                  onBlur={handleMobileSearchBlur}
+                  value={searchQuery}
+                  placeholder="Search courses and paths"
+                  screenReaderText="Search"
+                />
+              </div>
+              )}
+              <Stack direction="horizontal" gap={3} className="justify-content-between align-items-center mb-3">
+                {isSmall && (
+                <Button onClick={() => setShowFilters(true)} variant="secondary" className="filter-button border-0">
+                  <Icon src={FilterAlt} /> Filter
+                </Button>
+                )}
+                <div className={`small text-muted ${isSmall ? 'ms-auto' : ''}`}>
+                  Showing <b>{showingCount}</b> of <b>{totalCount}</b>
+                </div>
+              </Stack>
+              <hr className="mt-0 mb-4" />
+
+              {isLoading ? (
+                <Stack direction="vertical" className="justify-content-center align-items-center py-5" style={{ minHeight: '400px' }}>
+                  <Spinner animation="border" variant="primary" />
                 </Stack>
-                <hr className="mt-0 mb-4" />
-                {sortedItems.length === 0 ? (
+              ) : sortedItems.length === 0 ? (
                   <Stack direction="vertical" gap={4} className="align-items-center justify-content-center text-center py-5">
                     <Image src={noResultsSVG} alt="No results" />
                     <Stack direction="vertical" gap={2}>
@@ -413,9 +405,8 @@ const Dashboard = () => {
                       className="d-flex justify-content-center mt-4"
                     />
                   </>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </Container>
         </main>
       </div>

@@ -439,37 +439,39 @@ const Explore = () => {
           </div>
         </aside>
 
-        {/* Filter Toggle Button - Fixed position */}
-        <IconButton
-          src={FilterList}
-          iconAs={Icon}
-          alt="Toggle filters"
-          onClick={() => setShowFilters(!showFilters)}
-          className="filter-toggle-icon-btn"
-          variant="primary"
-        />
-
         {/* Main Content */}
         <main className={`explore-main-content ${showFilters ? 'sidebar-open' : 'sidebar-closed'}`}>
           <Container fluid className="px-3 px-md-4 py-4">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-              <div className="d-flex align-items-center gap-3">
-                <div>
-                  <h1 className="mb-1">Explore</h1>
-                  <div className="text-muted">
-                    Showing {filteredItems.length} of {itemsWithStatus.length}
-                  </div>
+              <div className="d-flex flex-column align-items-start" style={{ minWidth: '300px' }}>
+                <div className="d-flex align-items-center mb-1" style={{ gap: '1rem', minHeight: '44px' }}>
+                  <h1 className="mb-0">Explore</h1>
+                  {!isSmall && (
+                    <Button
+                      variant="outline-primary"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="d-flex align-items-center gap-1"
+                      size="sm"
+                    >
+                      <Icon src={FilterList} className="mb-0" style={{ width: '20px', height: '20px' }} />
+                      Filter
+                    </Button>
+                  )}
+                </div>
+                <div className="text-muted" style={{ minHeight: '20px' }}>
+                  Showing {filteredItems.length} of {itemsWithStatus.length}
                 </div>
               </div>
-              <SearchField
-                onClear={() => setSearchQuery('')}
-                onChange={setSearchQuery}
-                onSubmit={() => {}}
-                value={searchQuery}
-                placeholder="Search"
-                className="w-100 w-md-50"
-                style={{ maxWidth: isSmall ? '100%' : '400px' }}
-              />
+              <div className="dashboard-search-wrapper">
+                <SearchField
+                  onClear={() => setSearchQuery('')}
+                  onChange={setSearchQuery}
+                  onSubmit={() => {}}
+                  value={searchQuery}
+                  placeholder="Search"
+                  screenReaderText="Search"
+                />
+              </div>
             </div>
 
             {(() => {

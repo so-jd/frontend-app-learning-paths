@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  Button, ButtonGroup, Form, Icon, IconButton,
+  Button, Form, Icon, IconButton,
 } from '@openedx/paragon';
 import { Close } from '@openedx/paragon/icons';
 
@@ -17,23 +17,17 @@ const FilterPanel = ({
   organizations,
   onClose,
   isSmall,
-  onClearAll,
 }) => (
   <div className="filter-sidebar-content">
     <div className="filter-header">
       <h4 className="mb-0">Filters</h4>
-      {!isSmall && (
-        <Button variant="link" onClick={onClearAll} className="filter-clear-link">Clear all</Button>
-      )}
-      {isSmall && (
-        <IconButton
-          src={Close}
-          iconAs={Icon}
-          onClick={onClose}
-          alt="Close filters"
-          size="sm"
-        />
-      )}
+      <IconButton
+        src={Close}
+        iconAs={Icon}
+        alt="Close filters"
+        onClick={onClose}
+        size="sm"
+      />
     </div>
 
     {/* Content Type Section */}
@@ -146,15 +140,6 @@ const FilterPanel = ({
       </div>
     )}
 
-    {/* Action Buttons */}
-    {isSmall && (
-      <div className="filter-actions">
-        <ButtonGroup className="w-100">
-          <Button variant="outline-secondary" onClick={onClearAll}>Clear all</Button>
-          <Button variant="primary" onClick={onClose}>Apply</Button>
-        </ButtonGroup>
-      </div>
-    )}
   </div>
 );
 
@@ -175,7 +160,6 @@ FilterPanel.propTypes = {
   ).isRequired,
   onClose: PropTypes.func.isRequired,
   isSmall: PropTypes.bool.isRequired,
-  onClearAll: PropTypes.func.isRequired,
 };
 
 export default FilterPanel;

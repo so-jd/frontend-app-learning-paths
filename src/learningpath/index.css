@@ -124,42 +124,61 @@
   }
 }
 
-.dashboard {
-  /* Filter Toggle Button Wrapper - pushes content */
-  .filter-toggle-wrapper {
-    display: flex;
-    align-items: center;
-    animation: slideIn 0.3s ease;
-    margin-left: calc(-1 * var(--pgn-spacing-spacer-4, 1.5rem));
-    margin-right: auto;
+/* Search field styling - applies to both Dashboard and Explore pages */
+.pgn__searchfield {
+  height: 3rem;
+  border-width: 2px;
+  border-radius: 0.5rem;
+  border-color: #d0d0d0;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
 
-    .filter-toggle-btn {
-      width: 64px;
-      height: 48px;
-      border-radius: 0 8px 8px 0;
-      background-color: var(--crimson) !important;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-      border: none;
-      padding-left: 14px;
-      padding-right: 8px;
+  &.has-focus {
+    border-color: var(--crimson);
+    box-shadow: 0 0 0 3px rgba(0, 98, 176, 0.1);
+  }
+
+  &:hover:not(.has-focus) {
+    border-color: #a0a0a0;
+  }
+
+  &:after {
+    display: none;
+  }
+
+  input {
+    font-size: 0.95rem;
+
+    &::placeholder {
+      color: #6c757d;
+    }
+  }
+
+  button {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: unset;
+    }
+
+    &.pgn__searchfield__iconbutton-submit {
+      color: var(--icon-blue);
+    }
+
+    &.pgn__searchfield__iconbutton-reset {
+      color: var(--crimson);
 
       &:hover {
-        background-color: #004d8c !important;
-        box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.3);
-      }
-
-      &:active {
-        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
-      }
-
-      svg {
-        color: white;
-        width: 24px;
-        height: 24px;
+        background-color: rgba(0, 98, 176, 0.1);
       }
     }
   }
+}
+
+.dashboard {
+
 
   @keyframes slideIn {
     from {
@@ -220,60 +239,6 @@
     to {
       opacity: 1;
       transform: translateY(0);
-    }
-  }
-
-  .pgn__searchfield {
-    height: 3rem;
-    border-width: 2px;
-    border-radius: 0.5rem;
-    border-color: #d0d0d0;
-    /* Avoid cutting corners with the border radius. */
-    overflow: hidden;
-    transition: all 0.2s ease;
-    background-color: #ffffff;
-
-    &.has-focus {
-      border-color: var(--crimson);
-      box-shadow: 0 0 0 3px rgba(0, 98, 176, 0.1);
-    }
-
-    &:hover:not(.has-focus) {
-      border-color: #a0a0a0;
-    }
-
-    /* Hide the extra border when the search field is focused. */
-    &:after {
-      display: none;
-    }
-
-    input {
-      font-size: 0.95rem;
-
-      &::placeholder {
-        color: #6c757d;
-      }
-    }
-
-    button {
-      transition: all 0.2s ease;
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-        color: unset;
-      }
-
-      &.pgn__searchfield__iconbutton-submit {
-        color: var(--icon-blue);
-      }
-
-      &.pgn__searchfield__iconbutton-reset {
-        color: var(--crimson);
-
-        &:hover {
-          background-color: rgba(0, 98, 176, 0.1);
-        }
-      }
     }
   }
 
@@ -979,161 +944,8 @@
   display: flex;
   min-height: 100vh;
   position: relative;
-
-  .filter-toggle-icon-btn {
-    position: fixed;
-    left: 320px; /* Position at the edge of the open sidebar */
-    top: 130px; /* Align with Explore title height (66px header + ~64px padding/content) */
-    z-index: 1001;
-    width: 48px;
-    height: 48px;
-    border-radius: 0 8px 8px 0;
-    background-color: var(--crimson) !important;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    border: none;
-
-    &:hover {
-      background-color: #004d8c !important;
-      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    svg {
-      color: white;
-      width: 24px;
-      height: 24px;
-    }
-
-    @media (max-width: 767px) {
-      left: auto;
-      right: 1rem;
-      top: 7rem;
-      transform: none;
-      border-radius: 8px;
-    }
-  }
 }
 
-.filter-sidebar-container {
-  position: fixed;
-  left: 0;
-  top: 0; /* Span full page height */
-  bottom: 0;
-  width: 320px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  z-index: 1000; /* Behind header navbar (which is 1050) */
-  transition: transform 0.3s ease;
-  overflow-y: auto;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-
-  &.closed {
-    transform: translateX(-100%);
-
-    /* Move button to left edge when closed */
-    ~ .filter-toggle-icon-btn {
-      left: 0;
-    }
-  }
-
-  &.open {
-    transform: translateX(0);
-  }
-
-  @media (max-width: 767px) {
-    width: 100%;
-    z-index: 1000; /* Keep behind header on mobile too */
-  }
-
-  .filter-sidebar-content {
-    padding: 1.5rem;
-    padding-top: calc(66px + 1.5rem); /* Account for header height + standard padding */
-  }
-
-  .filter-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e0e0e0;
-
-    h4 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #333;
-    }
-  }
-
-  .filter-section {
-    margin-bottom: 2rem;
-
-    .filter-section-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #333;
-    }
-  }
-
-  .content-type-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 0.75rem;
-
-    @media (max-width: 767px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .filter-grid-btn {
-      padding: 0.6rem 0.5rem;
-      font-size: 0.85rem;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      border-radius: 0.375rem;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      @media (max-width: 767px) {
-        font-size: 0.8rem;
-        padding: 0.75rem 0.5rem;
-      }
-    }
-  }
-
-  .status-filter-checkboxes {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    .filter-checkbox {
-      margin: 0;
-      display: flex;
-      align-items: center;
-
-      .form-check-input {
-        margin-top: 0;
-        margin-right: 0.5rem;
-        flex-shrink: 0;
-        width: 1.125rem;
-        height: 1.125rem;
-        cursor: pointer;
-      }
-
-      .form-check-label {
-        font-size: 0.9rem;
-        color: #555;
-        cursor: pointer;
-        user-select: none;
-        margin-bottom: 0;
-        line-height: 1.125rem;
-      }
-    }
-  }
-}
 
 .explore-main-content {
   flex: 1;
@@ -1205,15 +1017,6 @@
 
   .text-muted {
     font-size: 0.95rem;
-  }
-
-  /* Add margin to avoid filter button overlap in both states */
-  .container-fluid {
-    padding-left: 80px !important; /* 48px button + extra spacing */
-
-    @media (max-width: 767px) {
-      padding-left: 1rem !important;
-    }
   }
 
   .card {
